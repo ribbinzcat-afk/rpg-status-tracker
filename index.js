@@ -112,10 +112,10 @@ async function initExtension() {
     registerExtensionPrompt(
         extensionName,
         generateStatusPrompt,
-        extension_prompt_types.IN_PROMPT,
+        0, // เปลี่ยนจาก extension_prompt_types.IN_PROMPT เป็นเลข 0
         1, // ความสำคัญ
         false,
-        0  // เปลี่ยนตรงนี้เป็นเลข 0 (หมายถึง System Role)
+        0  // System Role
     );
     
     console.log(`[${extensionName}] โหลดเสร็จสมบูรณ์!`);
