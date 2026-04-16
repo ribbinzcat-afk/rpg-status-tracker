@@ -106,19 +106,33 @@ async function initExtension() {
     }
 
     setupUI();
-
     eventSource.on(event_types.MESSAGE_RECEIVED, handleIncomingMessage);
-    
-    console.log(`[${extensionName}] โหลดเสร็จสมบูรณ์!`);
+    eventSource.on(event_types.CHAT_CHANGED, handleChatChanged);
+
+        // ลงทะเบียนฟังก์ชันให้ SillyTavern รู้จัก (ทำแค่ครั้งเดียวตอนโหลดเว็บ)
+    try {
+        setExtensionPrompt(
+            extensionName,
+            generateStatusPrompt, // ส่ง "ชื่อฟังก์ชัน" เข้าไป (ห้ามใส่วงเล็บ)
+            0, // 0 = IN_PROMPT (แทรกใน System Prompt)
+            1, // Depth/ความสำคัญ
+            true, // ให้มีบรรทัดว่างคั่น
+            0  // 0 = SYSTEM ROLE
+        );
+        console.log(`[${extensionName}] ✅ ลงทะเบียน Prompt สำเร็จ!`);
+    } catch (error) {
+        console.error(`[${extensionName}] ❌ ลงทะเบียน Prompt ล้มเหลว:`, error);
+    }
+
+    console.log(`[${extensionName}] 🎉 โหลดเสร็จสมบูรณ์!`);
 }
 
 // ฟังก์ชันสำหรับสร้างข้อความสถานะเพื่อส่งให้ AI
-// ฟังก์ชันสำหรับสร้างข้อความสถานะเพื่อส่งให้ AI
+// ฟังก์ชันนี้จะถูก SillyTavern เรียกอัตโนมัติ "ทุกครั้ง" ที่เรากดส่งข้อความหา AI
 function generateStatusPrompt() {
     const settings = extension_settings[extensionName];
     const currentPresetKey = settings.currentPreset;
 
-    // เช็คว่ามีข้อมูลไหม ถ้าไม่มีให้หยุด
     if (!settings.saveData || !settings.saveData[currentPresetKey]) return "";
 
     const saveData = settings.saveData[currentPresetKey];
@@ -153,8 +167,8 @@ function generateStatusPrompt() {
 
     const finalPrompt = promptText.trim();
 
-    // แจ้งเตือนใน Console ว่ากำลังจะส่งข้อความนี้ให้ AI
-    console.log(`[${extensionName}] 📨 กำลังแนบสถานะไปกับ Prompt: \n`, finalPrompt);
+    // แจ้งเตือนใน Console ว่าระบบกำลังดึงข้อมูลไปให้ AI
+    console.log(`[${extensionName}] 📨 SillyTavern กำลังดึงสถานะไปส่งให้ AI: \n${finalPrompt}`);
 
     return finalPrompt;
 }
