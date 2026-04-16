@@ -23,8 +23,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 450px;
-    max-height: 80vh;
+    /* แก้ไขความกว้างตรงนี้ครับ */
+    width: 90%;
+    max-width: 450px;
+    max-height: 85vh; /* ให้สูงขึ้นนิดนึงบนมือถือ */
     /* --- ส่วนที่แก้เพื่อให้อ่านง่ายขึ้น --- */
     background-color: rgba(25, 25, 25, 0.95); /* สีเทาเข้มเกือบทึบ 95% */
     backdrop-filter: blur(10px); /* ทำเอฟเฟกต์กระจกฝ้าเบลอฉากหลัง (ถ้าเบราว์เซอร์รองรับ) */
@@ -48,12 +50,61 @@
     background-color: var(--SmartThemeBlurTintColor);
     border-bottom: 1px solid var(--SmartThemeBorderColor);
     border-radius: 8px 8px 0 0;
+    gap: 10px; /* เพิ่มระยะห่างกันปุ่มเบียด */
 }
 
 .rpg-header-controls {
     display: flex;
     gap: 10px;
     align-items: center;
+    flex-wrap: wrap; /* ถ้าจอมือถือแคบมาก ให้ปุ่มปัดตกลงมาบรรทัดใหม่ได้ */
+}
+
+/* =========================================
+   Media Query สำหรับหน้าจอโทรศัพท์ (กว้างไม่เกิน 600px)
+   ========================================= */
+@media screen and (max-width: 600px) {
+    /* ลด Padding ของหน้าต่างลง เพื่อเพิ่มพื้นที่เนื้อหา */
+    .rpg-modal-header {
+        padding: 10px;
+    }
+
+    .rpg-modal-content {
+        padding: 10px;
+    }
+
+    /* ลดขนาดตัวหนังสือและปุ่ม */
+    .rpg-preset-select, .rpg-reset-btn {
+        font-size: 0.85em;
+        padding: 4px 8px;
+    }
+
+    .rpg-tab-btn {
+        padding: 8px 5px;
+        font-size: 0.9em;
+    }
+
+    /* ลดขนาด Module ให้อ่านง่ายบนจอมือถือ */
+    .rpg-module-title {
+        font-size: 1em;
+    }
+
+    .rpg-numeric-item {
+        padding: 6px 10px;
+        font-size: 0.9em;
+    }
+
+    .rpg-complex-card {
+        padding: 8px;
+    }
+
+    .rpg-complex-header {
+        font-size: 0.95em;
+    }
+
+    .rpg-complex-desc {
+        font-size: 0.85em;
+    }
 }
 
 .rpg-preset-select {
