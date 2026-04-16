@@ -4,8 +4,8 @@
     "description": "ระบบหน้าต่างสถานะที่สามารถ Customise ได้ พร้อมระบบดักจับ Regex อัปเดตค่าอัตโนมัติ",
     "version": "1.0.0",
     "author": "Lou",
-    "main": "index.js",
-    "assets": [
+    "js": "index.js",
+    "css": [
         "style.css"
     ],
     "require": []
