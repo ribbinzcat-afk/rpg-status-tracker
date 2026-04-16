@@ -384,8 +384,8 @@ async function handleIncomingMessage() {
         });
 
         // 4. ลบแท็ก <update> ออกจากหน้าแชท
-        text = text.replace(updateRegex, '').trim();
-        lastMessage.mes = text;
+        const cleanedText = text.replace(match[0], '').trim();
+        lastMessage.mes = cleanedText;
 
         // นำเข้าฟังก์ชันบันทึกแชทจาก script.js เพื่อให้ข้อความที่ถูกลบแท็กไปแล้ว ถูกเซฟลงระบบ
         const { saveChatDebounced, reloadCurrentChat } = await import("../../../../script.js");
