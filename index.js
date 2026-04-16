@@ -383,16 +383,23 @@ async function handleIncomingMessage() {
             }
         });
 
-        // 4. ลบแท็ก <update> ออกจากหน้าแชท เพื่อไม่ให้รกสายตาผู้เล่น
+        // 4. ลบแท็ก <update> ออกจากหน้าแชท
         text = text.replace(updateRegex, '').trim();
         lastMessage.mes = text;
 
-        // สั่งให้ SillyTavern รีเฟรชหน้าต่างแชทเพื่อซ่อนข้อความ
-        const { updateMessageBlock } = await import("../../../../chat.js");
-        updateMessageBlock(chat.length - 1, lastMessage);
+        // นำเข้าฟังก์ชันบันทึกแชทจาก script.js เพื่อให้ข้อความที่ถูกลบแท็กไปแล้ว ถูกเซฟลงระบบ
+        const { saveChatDebounced, reloadCurrentChat } = await import("../../../../script.js");
+        saveChatDebounced();
 
         // 5. อัปเดตหน้าต่าง UI สถานะของเรา!
         renderUI();
+        console.log(`[${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว!`);
+
+        // 6. บังคับรีเฟรชหน้าแชท 1 ครั้ง เพื่อให้ข้อความ <update> หายไปจากหน้าจอจริงๆ
+        // (หน่วงเวลาเล็กน้อยเพื่อให้ระบบเซฟแชทเสร็จก่อน)
+        setTimeout(() => {
+            reloadCurrentChat();
+        }, 100);
     }
 }
 
