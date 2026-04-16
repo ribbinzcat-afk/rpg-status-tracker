@@ -19,13 +19,16 @@
 /* ตัวหน้าต่างลอย (Modal) */
 #rpg-status-modal {
     display: none; 
+    position: fixed;
     /* เปลี่ยนจาก display: none เป็น flex เมื่อต้องการโชว์ */
     /* display: flex; */ 
     
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+        /* --- สูตรตำแหน่งจากคลังฟอนต์ --- */
+    top: 50px;       /* กำหนดระยะห่างจากขอบบนให้แน่นอน (ปรับตัวเลขได้ตามชอบ) */
+    left: 0;
+    right: 0;
+    margin: 0 auto;  /* จัดกึ่งกลางแนวนอนอัตโนมัติ */
+    /* ---------------------------- */
     
     width: 90%;
     max-width: 450px;
