@@ -111,13 +111,13 @@ async function initExtension() {
 
     // (เพิ่มใหม่) ลงทะเบียนส่ง Prompt สถานะไปให้ AI แบบเงียบๆ
     // มันจะแอบแทรกข้อความนี้ไปที่ส่วนท้ายสุดของ System Prompt เสมอ
-setExtensionPrompt(
+    setExtensionPrompt(
         extensionName,
         generateStatusPrompt,
-        extension_prompt_types.IN_PROMPT,
-        1, // ความสำคัญ
-        false,
-        extension_prompt_roles.SYSTEM
+        0,
+        1,
+        true, // เปลี่ยนเป็น true เพื่อให้มีบรรทัดว่างคั่นข้อความให้สวยงาม
+        0
     );
     
     console.log(`[${extensionName}] โหลดเสร็จสมบูรณ์!`);
