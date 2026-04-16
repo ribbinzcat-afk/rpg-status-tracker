@@ -251,3 +251,52 @@
     text-align: center;
     padding: 10px;
 }
+
+/* ปุ่มไอคอนสำหรับ New และ Edit */
+.rpg-icon-btn {
+    background-color: var(--SmartThemeBlurTintColor);
+    color: var(--textLight);
+    border: 1px solid var(--SmartThemeBorderColor);
+    padding: 5px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+.rpg-icon-btn:hover { background-color: var(--SmartThemeBotMesBlurTintColor); }
+
+/* หน้าต่าง Editor (ซ่อนไว้เป็นค่าเริ่มต้น) */
+#rpg-editor-container {
+    display: none;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 15px;
+    background-color: rgba(0,0,0,0.5);
+}
+
+#rpg-preset-editor {
+    flex-grow: 1;
+    width: 100%;
+    min-height: 250px;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 0.9em;
+    resize: vertical;
+    white-space: pre;
+}
+
+#rpg-save-preset-btn {
+    margin-top: 10px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#rpg-save-preset-btn:hover { background-color: #4cae4c; }
