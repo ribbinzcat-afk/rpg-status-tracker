@@ -25,7 +25,11 @@
     transform: translate(-50%, -50%);
     width: 450px;
     max-height: 80vh;
-    background-color: var(--bgLight);
+    /* --- ส่วนที่แก้เพื่อให้อ่านง่ายขึ้น --- */
+    background-color: rgba(25, 25, 25, 0.95); /* สีเทาเข้มเกือบทึบ 95% */
+    backdrop-filter: blur(10px); /* ทำเอฟเฟกต์กระจกฝ้าเบลอฉากหลัง (ถ้าเบราว์เซอร์รองรับ) */
+    color: #ffffff; /* บังคับให้ตัวหนังสือเป็นสีขาวจะได้ตัดกับพื้นหลัง */
+    /* ---------------------------------- */
     color: var(--textLight);
     border: 2px solid var(--SmartThemeBorderColor);
     border-radius: 10px;
