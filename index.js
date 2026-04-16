@@ -1,7 +1,7 @@
 console.log("===== ไฟล์ index.js ของ RPG Status ถูกอ่านแล้ว! =====");
 
 // นำเข้า API ของ SillyTavern ที่จำเป็น
-import { extension_settings, getContext, registerExtensionPrompt, extension_prompt_types, extension_prompt_roles } from "../../../extensions.js";
+import { extension_settings, getContext, registerExtensionPrompt, extension_prompt_types } from "../../../extensions.js";
 import { eventSource, event_types } from "../../../../script.js";
 
 // ชื่อของ Extension เรา (ใช้สำหรับเซฟการตั้งค่า)
@@ -113,11 +113,11 @@ async function initExtension() {
         extensionName,
         generateStatusPrompt,
         extension_prompt_types.IN_PROMPT,
-        1, // ความสำคัญ (ยิ่งเยอะยิ่งอยู่ล่างสุด)
+        1, // ความสำคัญ
         false,
-        extension_prompt_roles.SYSTEM
+        0  // เปลี่ยนตรงนี้เป็นเลข 0 (หมายถึง System Role)
     );
-
+    
     console.log(`[${extensionName}] โหลดเสร็จสมบูรณ์!`);
 }
 
