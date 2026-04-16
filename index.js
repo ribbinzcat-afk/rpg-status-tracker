@@ -124,28 +124,30 @@ setExtensionPrompt(
 }
 
 // ฟังก์ชันสำหรับสร้างข้อความสถานะเพื่อส่งให้ AI
+// ฟังก์ชันสำหรับสร้างข้อความสถานะเพื่อส่งให้ AI
 function generateStatusPrompt() {
     const settings = extension_settings[extensionName];
     const currentPresetKey = settings.currentPreset;
+
+    // เช็คว่ามีข้อมูลไหม ถ้าไม่มีให้หยุด
+    if (!settings.saveData || !settings.saveData[currentPresetKey]) return "";
+
     const saveData = settings.saveData[currentPresetKey];
     const presetLayout = settings.presets[currentPresetKey];
 
-    let promptText = "[System Note - Player Current Status]\n";
+    let promptText = "\n[System Note - Player Current Status]\n";
 
-    // วนลูปอ่านข้อมูลทีละ Tab
     presetLayout.tabs.forEach(tab => {
         let tabData = [];
         tab.modules.forEach(module => {
             const val = saveData[module.id] !== undefined ? saveData[module.id] : module.default;
 
             if (module.type === "numeric") {
-                // เช่น "HP: 100/100" หรือ "Gold: 500"
                 let text = `${module.name.split(' ')[0]}: ${val}`;
                 if (module.max !== undefined) text += `/${module.max}`;
                 tabData.push(text);
             }
             else if (module.type === "complex") {
-                // เช่น "Items: ดาบไม้(x1), โพชั่น(x3)"
                 if (Array.isArray(val) && val.length > 0) {
                     const itemsText = val.map(item => `${item.name}(x${item.amount})`).join(', ');
                     tabData.push(`${module.name.split(' ')[0]}: ${itemsText}`);
@@ -160,7 +162,12 @@ function generateStatusPrompt() {
         }
     });
 
-    return promptText.trim();
+    const finalPrompt = promptText.trim();
+
+    // แจ้งเตือนใน Console ว่ากำลังจะส่งข้อความนี้ให้ AI
+    console.log(`[${extensionName}] 📨 กำลังแนบสถานะไปกับ Prompt: \n`, finalPrompt);
+
+    return finalPrompt;
 }
 
 //ฟังก์ชั่นสำหรับสร้างหน้าต่าง UI
