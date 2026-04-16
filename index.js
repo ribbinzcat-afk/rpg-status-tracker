@@ -243,6 +243,7 @@ function setupUI() {
                         <select class="rpg-preset-select" id="rpg-preset-dropdown"></select>
                         <button class="rpg-icon-btn" id="rpg-new-preset-btn" title="สร้าง Preset ใหม่"><i class="fa-solid fa-plus"></i></button>
                         <button class="rpg-icon-btn" id="rpg-edit-preset-btn" title="แก้ไขโครงสร้าง Preset"><i class="fa-solid fa-pen"></i></button>
+                        <button class="rpg-icon-btn" id="rpg-delete-preset-btn" title="ลบ Preset นี้" style="color: #ff6b6b;"><i class="fa-solid fa-trash"></i></button>
                         <button class="rpg-reset-btn" id="rpg-reset-btn" title="รีเซ็ตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
                     </div>
                     <div class="rpg-close-btn" id="rpg-close-btn"><i class="fa-solid fa-xmark"></i></div>
@@ -339,6 +340,34 @@ function setupUI() {
                         }
                     });
                 });
+
+                        // 🌟 ปุ่ม "🗑️" ลบ Preset ปัจจุบัน
+        $('#rpg-delete-preset-btn').on('click', () => {
+            const currentKey = settings.currentPreset;
+
+            // เช็คก่อนว่ามี Preset เหลือมากกว่า 1 อันไหม (ไม่งั้นลบหมดแล้วระบบจะพัง)
+            const presetKeys = Object.keys(settings.presets);
+            if (presetKeys.length <= 1) {
+                alert("ไม่สามารถลบได้! ต้องมี Preset เหลืออยู่อย่างน้อย 1 อันเสมอครับ");
+                return;
+            }
+
+            // เด้งถามเพื่อความชัวร์
+            const presetName = settings.presets[currentKey].name;
+            if(confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบ Preset "${presetName}" ?\n(ข้อมูลสถานะและไอเทมทั้งหมดของ Preset นี้จะหายไปอย่างถาวร)`)) {
+
+                // ลบข้อมูลออกจากระบบ
+                delete settings.presets[currentKey];
+                delete settings.saveData[currentKey];
+
+                // เปลี่ยนให้ไปใช้ Preset ตัวแรกสุดที่เหลืออยู่แทน
+                const remainingKeys = Object.keys(settings.presets);
+                settings.currentPreset = remainingKeys[0];
+
+                console.log(`[${extensionName}] 🗑️ ลบ Preset สำเร็จ! สลับไปใช้: ${settings.currentPreset}`);
+
+            }
+        });
 
                 $('#rpg-editor-container').hide();
                 $('.rpg-tabs, .rpg-modal-content').show();
