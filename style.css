@@ -1,0 +1,198 @@
+/* ปุ่มเปิดหน้าต่างสถานะ (จะไปอยู่ตรงเมนูด้านบน) */
+#rpg-status-toggle-btn {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: var(--SmartThemeBlurTintColor);
+    color: var(--SmartThemeBodyColor);
+    border: 1px solid var(--SmartThemeBorderColor);
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#rpg-status-toggle-btn:hover {
+    background-color: var(--SmartThemeBotMesBlurTintColor);
+}
+
+/* ตัวหน้าต่างลอย (Modal) */
+#rpg-status-modal {
+    display: none; /* ซ่อนไว้ก่อนตอนแรก */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 450px;
+    max-height: 80vh;
+    background-color: var(--bgLight);
+    color: var(--textLight);
+    border: 2px solid var(--SmartThemeBorderColor);
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ส่วนหัว (Header) - Dropdown & ปุ่ม Reset */
+.rpg-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--SmartThemeBlurTintColor);
+    border-bottom: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 8px 8px 0 0;
+}
+
+.rpg-header-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.rpg-preset-select {
+    padding: 5px;
+    border-radius: 5px;
+    background: var(--bgLight);
+    color: var(--textLight);
+    border: 1px solid var(--SmartThemeBorderColor);
+}
+
+.rpg-reset-btn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.rpg-reset-btn:hover { background-color: #c9302c; }
+
+.rpg-close-btn {
+    cursor: pointer;
+    font-size: 1.5em;
+    line-height: 1;
+}
+
+/* ระบบ Tabs */
+.rpg-tabs {
+    display: flex;
+    background-color: var(--SmartThemeBotMesBlurTintColor);
+    border-bottom: 2px solid var(--SmartThemeBorderColor);
+}
+
+.rpg-tab-btn {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--textLight);
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.rpg-tab-btn:hover { background-color: rgba(255,255,255,0.1); }
+
+.rpg-tab-btn.active {
+    background-color: var(--bgLight);
+    border-bottom: 3px solid #5bc0de;
+}
+
+/* พื้นที่แสดงเนื้อหา (Modules จะมาอยู่ตรงนี้) */
+.rpg-modal-content {
+    padding: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+    min-height: 200px;
+}
+
+.rpg-tab-content {
+    display: none; /* ซ่อนเนื้อหา Tab อื่นไว้ */
+}
+
+.rpg-tab-content.active {
+    display: block; /* แสดงเฉพาะ Tab ที่เลือก */
+}
+
+/* --- ดีไซน์สำหรับ Module --- */
+.rpg-module-group {
+    margin-bottom: 20px;
+}
+
+.rpg-module-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    border-bottom: 1px solid var(--SmartThemeBorderColor);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    color: #5bc0de;
+}
+
+/* Module: Numeric (ตัวเลข/หลอดพลัง) */
+.rpg-numeric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.rpg-numeric-label {
+    font-weight: bold;
+}
+
+.rpg-numeric-value {
+    font-family: monospace;
+    font-size: 1.2em;
+    color: #f0ad4e;
+}
+
+/* Module: Complex (ไอเทม/ความสัมพันธ์) */
+.rpg-complex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rpg-complex-card {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-left: 4px solid #5cb85c;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.rpg-complex-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.rpg-complex-amount {
+    background-color: var(--SmartThemeBlurTintColor);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+}
+
+.rpg-complex-desc {
+    font-size: 0.9em;
+    color: #bbb;
+    line-height: 1.4;
+}
+
+.rpg-empty-text {
+    color: #777;
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+}
