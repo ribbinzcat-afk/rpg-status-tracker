@@ -2,7 +2,9 @@ console.log("===== ไฟล์ index.js ของ RPG Status ถูกอ่า
 
 // นำเข้า API พื้นฐาน
 import { extension_settings, getContext } from "../../../extensions.js";
-import { eventSource, event_types,registerExtensionPrompt, extension_prompt_types, extension_prompt_roles } from "../../../../script.js";
+
+// นำเข้า API ทั้งหมดจาก script.js
+import { eventSource, event_types, extension_prompt_types, extension_prompt_roles, setExtensionPrompt } from "../../../../script.js";
 
 // ชื่อของ Extension เรา (ใช้สำหรับเซฟการตั้งค่า)
 const extensionName = "rpg-status-tracker";
@@ -109,7 +111,7 @@ async function initExtension() {
 
     // (เพิ่มใหม่) ลงทะเบียนส่ง Prompt สถานะไปให้ AI แบบเงียบๆ
     // มันจะแอบแทรกข้อความนี้ไปที่ส่วนท้ายสุดของ System Prompt เสมอ
-    registerExtensionPrompt(
+setExtensionPrompt(
         extensionName,
         generateStatusPrompt,
         extension_prompt_types.IN_PROMPT,
