@@ -108,17 +108,6 @@ async function initExtension() {
     setupUI();
 
     eventSource.on(event_types.MESSAGE_RECEIVED, handleIncomingMessage);
-
-    // (เพิ่มใหม่) ลงทะเบียนส่ง Prompt สถานะไปให้ AI แบบเงียบๆ
-    // มันจะแอบแทรกข้อความนี้ไปที่ส่วนท้ายสุดของ System Prompt เสมอ
-    setExtensionPrompt(
-        extensionName,
-        generateStatusPrompt,
-        0,
-        1,
-        true, // เปลี่ยนเป็น true เพื่อให้มีบรรทัดว่างคั่นข้อความให้สวยงาม
-        0
-    );
     
     console.log(`[${extensionName}] โหลดเสร็จสมบูรณ์!`);
 }
@@ -608,6 +597,24 @@ function renderUI() {
         const targetId = $(this).data('target');
         $(`#${targetId}`).addClass('active');
     });
+        updateExtensionPrompt();
+} // <-- ปิดฟังก์ชัน renderUI
+
+// ฟังก์ชันสำหรับอัปเดต Prompt ให้เป็นข้อความล่าสุดเสมอ
+function updateExtensionPrompt() {
+    const promptString = generateStatusPrompt(); // ดึงข้อความสถานะล่าสุดมา
+
+    // ส่งข้อความ (String) เข้าไปตรงๆ แทนการส่งฟังก์ชัน
+    setExtensionPrompt(
+        extensionName,
+        promptString,
+        0, // IN_PROMPT
+        1, // ความสำคัญ
+        true,
+        0  // SYSTEM ROLE
+    );
+
+    console.log(`[${extensionName}] 🔄 อัปเดต Prompt สถานะล่าสุดแล้ว!`);
 }
 
 // สั่งให้ Extension เริ่มทำงาน
