@@ -589,32 +589,47 @@ function renderUI() {
         contentContainer.append(tabContentHtml);
     });
 
-    // 4. ผูก Event Listener ให้ปุ่ม Tab ที่เพิ่งสร้างใหม่
-    $('.rpg-tab-btn').off('click').on('click', function() {
-        $('.rpg-tab-btn').removeClass('active');
-        $('.rpg-tab-content').removeClass('active');
-        $(this).addClass('active');
-        const targetId = $(this).data('target');
-        $(`#${targetId}`).addClass('active');
-    });
+        // ผูก Event Listener ให้ปุ่ม Tab ที่เพิ่งสร้างใหม่
+        $('.rpg-tab-btn').off('click').on('click', function() {
+            $('.rpg-tab-btn').removeClass('active');
+            $('.rpg-tab-content').removeClass('active');
+            $(this).addClass('active');
+            const targetId = $(this).data('target');
+            $(`#${targetId}`).addClass('active');
+        });
         updateExtensionPrompt();
 } // <-- ปิดฟังก์ชัน renderUI
 
 // ฟังก์ชันสำหรับอัปเดต Prompt ให้เป็นข้อความล่าสุดเสมอ
+// ฟังก์ชันสำหรับอัปเดต Prompt ให้เป็นข้อความล่าสุดเสมอ
 function updateExtensionPrompt() {
-    const promptString = generateStatusPrompt(); // ดึงข้อความสถานะล่าสุดมา
+    try {
+        console.log(`[${extensionName}] 🔄 กำลังเตรียมอัปเดต Prompt...`);
 
-    // ส่งข้อความ (String) เข้าไปตรงๆ แทนการส่งฟังก์ชัน
-    setExtensionPrompt(
-        extensionName,
-        promptString,
-        0, // IN_PROMPT
-        1, // ความสำคัญ
-        true,
-        0  // SYSTEM ROLE
-    );
+        const promptString = generateStatusPrompt(); // ดึงข้อความสถานะล่าสุดมา
 
-    console.log(`[${extensionName}] 🔄 อัปเดต Prompt สถานะล่าสุดแล้ว!`);
+        if (!promptString) {
+            console.log(`[${extensionName}] ⚠️ ข้ามการอัปเดต: ไม่มีข้อมูลสถานะ`);
+            return;
+        }
+
+        console.log(`[${extensionName}] 📨 ข้อความที่จะส่งให้ AI: \n${promptString}`);
+
+        // ส่งข้อความเข้าสู่ระบบของ SillyTavern
+        setExtensionPrompt(
+            extensionName,
+            promptString,
+            0, // IN_PROMPT
+            1, // ความสำคัญ
+            true,
+            0  // SYSTEM ROLE
+        );
+
+        console.log(`[${extensionName}] ✅ ลงทะเบียน Prompt สำเร็จ!`);
+    } catch (error) {
+        // ถ้ามี Error (เช่น หาคำสั่ง setExtensionPrompt ไม่เจอ) มันจะฟ้องสีแดงตรงนี้ครับ!
+        console.error(`[${extensionName}] ❌ เกิดข้อผิดพลาดในการอัปเดต Prompt:`, error);
+    }
 }
 
 // สั่งให้ Extension เริ่มทำงาน
