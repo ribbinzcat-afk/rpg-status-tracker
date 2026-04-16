@@ -18,29 +18,30 @@
 
 /* ตัวหน้าต่างลอย (Modal) */
 #rpg-status-modal {
-    display: none; /* ซ่อนไว้ก่อนตอนแรก */
+    display: none; 
+    /* เปลี่ยนจาก display: none เป็น flex เมื่อต้องการโชว์ */
+    /* display: flex; */ 
+    
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    /* แก้ไขความกว้างตรงนี้ครับ */
+    
     width: 90%;
     max-width: 450px;
-    max-height: 85vh; /* ให้สูงขึ้นนิดนึงบนมือถือ */
-    /* เพิ่มส่วนนี้เข้าไปค่ะ */
+    max-height: 85vh; 
     margin: 0; 
-    overflow-y: auto; /* สำคัญมาก: ถ้าเนื้อหายาว ให้ scroll ในหน้าต่างแทนการดันหน้าต่างให้ยาวทะลุจอ */
-    /* --- ส่วนที่แก้เพื่อให้อ่านง่ายขึ้น --- */
-    background-color: rgba(25, 25, 25, 0.95); /* สีเทาเข้มเกือบทึบ 95% */
-    backdrop-filter: blur(10px); /* ทำเอฟเฟกต์กระจกฝ้าเบลอฉากหลัง (ถ้าเบราว์เซอร์รองรับ) */
-    color: #ffffff; /* บังคับให้ตัวหนังสือเป็นสีขาวจะได้ตัดกับพื้นหลัง */
-    /* ---------------------------------- */
-    color: var(--textLight);
-    border: 2px solid var(--SmartThemeBorderColor);
+    overflow-y: auto; 
+    
+    background-color: rgba(25, 25, 25, 0.95);
+    backdrop-filter: blur(10px);
+    color: #ffffff;
+    
+    border: 2px solid var(--SmartThemeBorderColor, #444);
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     z-index: 9999;
-    display: flex;
+    
     flex-direction: column;
 }
 
@@ -67,16 +68,13 @@
    Media Query สำหรับหน้าจอโทรศัพท์ (กว้างไม่เกิน 600px)
    ========================================= */
 @media screen and (max-width: 768px) {
-    .rpg-status-modal {
-        /* ปรับให้แน่ใจว่าอยู่กลางจอจริงๆ และไม่โดนอะไรดึงขึ้น */
-        top: 50% !important;
-        transform: translate(-50%, -50%) !important;
-
-        margin-top: 20px;
-        
-        /* ลดความสูงสูงสุดลงนิดนึง เพื่อหลบแถบ URL ของ Browser มือถือ */
+    #rpg-status-modal {
+        /* ปรับความกว้างให้เกือบเต็มจอ */
+        width: 95%;
+        /* ลบ margin-top ออก เพื่อให้ transform: translate ทำงานกึ่งกลางเป๊ะ */
+        margin-top: 0; 
+        /* ลดความสูงลงเล็กน้อยกันโดน UI เบราว์เซอร์บัง */
         max-height: 80vh; 
-
     }
     
     /* ลด Padding ของหน้าต่างลง เพื่อเพิ่มพื้นที่เนื้อหา */
