@@ -9,6 +9,7 @@ const extensionName = "rpg-status-tracker";
 // โครงสร้างข้อมูลตั้งต้น (Default Settings / Presets)
 const defaultSettings = {
     currentPreset: "fantasy", // Preset ที่กำลังใช้งานอยู่
+    showFloatingButton: true,
 
     // 1. ส่วนโครงสร้าง UI (Layout)
     presets: {
@@ -160,108 +161,121 @@ function generateStatusPrompt() {
 
 // ฟังก์ชันสำหรับสร้างหน้าต่าง UI
 function setupUI() {
-    // 1. สร้างปุ่มเปิด/ปิดหน้าต่าง แทรกไว้ที่แถบเมนูด้านบนของ SillyTavern
-    const toggleBtnHtml = `
-        <div id="rpg-status-toggle-btn" title="เปิดหน้าต่างสถานะตัวละคร">
-            <i class="fa-solid fa-address-card"></i> Status
-        </div>
-    `;
-    // แทรกลงไปในเมนูส่วนขยายด้านบน (Extensions Menu)
-    $('#extensionsMenu').append(toggleBtnHtml);
+    const settings = extension_settings[extensionName];
 
-    // 2. สร้างโครงสร้าง HTML ของหน้าต่างลอย (Modal)
+    // ==========================================
+    // ส่วนที่ 1: สร้างปุ่มลอย (ที่เมนูด้านบน)
+    // ==========================================
+    const topMenu = document.getElementById('extensionsMenu');
+    const floatingBtn = document.createElement('div');
+    floatingBtn.id = 'rpg-status-floating-btn';
+    floatingBtn.title = 'เปิดหน้าต่างสถานะตัวละคร';
+    floatingBtn.innerHTML = '<i class="fa-solid fa-address-card"></i> Status';
+
+    // ตั้งค่าให้แสดง/ซ่อน ตามที่เซฟไว้
+    floatingBtn.style.display = settings.showFloatingButton ? 'inline-flex' : 'none';
+
+    floatingBtn.addEventListener('click', () => {
+        $('#rpg-status-modal').fadeToggle(200);
+    });
+    topMenu.appendChild(floatingBtn);
+
+    // ==========================================
+    // ส่วนที่ 2: สร้าง UI ในแผงควบคุม (Extensions Panel)
+    // ==========================================
+    const extensionPanel = document.getElementById('extensions_settings');
+
+    // สร้างกล่องสำหรับ Extension ของเรา
+    const panelContainer = document.createElement('div');
+    panelContainer.className = 'extension_settings_block'; // Class มาตรฐานของ SillyTavern
+    panelContainer.innerHTML = `<h4><i class="fa-solid fa-address-card"></i> RPG Status Tracker</h4>`;
+
+    // 2.1 ปุ่มกดเปิดหน้าต่างจากในแผงควบคุม
+    const panelOpenBtn = document.createElement('button');
+    panelOpenBtn.className = 'menu_button';
+    panelOpenBtn.innerHTML = 'เปิดหน้าต่างสถานะ';
+    panelOpenBtn.addEventListener('click', () => {
+        $('#rpg-status-modal').fadeToggle(200);
+    });
+    panelContainer.appendChild(panelOpenBtn);
+
+    // 2.2 สวิตช์ Toggle สำหรับเปิด/ปิดปุ่มลอย
+    const toggleContainer = document.createElement('div');
+    toggleContainer.style.marginTop = '10px';
+    toggleContainer.innerHTML = `
+        <label class="checkbox_label">
+            <input type="checkbox" id="rpg-toggle-floating-btn" ${settings.showFloatingButton ? 'checked' : ''}>
+            <span>แสดงปุ่ม Status ที่เมนูด้านบน</span>
+        </label>
+    `;
+    panelContainer.appendChild(toggleContainer);
+
+    // นำกล่องทั้งหมดไปใส่ในแผงควบคุม
+    extensionPanel.appendChild(panelContainer);
+
+    // ผูก Event ให้สวิตช์ Toggle
+    document.getElementById('rpg-toggle-floating-btn').addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        settings.showFloatingButton = isChecked; // เซฟค่า
+        floatingBtn.style.display = isChecked ? 'inline-flex' : 'none'; // อัปเดตปุ่มลอยทันที
+    });
+
+    // ==========================================
+    // ส่วนที่ 3: สร้างหน้าต่างลอย (Modal) แบบเดิม
+    // ==========================================
     const modalHtml = `
         <div id="rpg-status-modal" style="display: none;">
-
-            <!-- ส่วนหัว: Dropdown, Reset, Close -->
             <div class="rpg-modal-header">
                 <div class="rpg-header-controls">
-                    <select class="rpg-preset-select" id="rpg-preset-dropdown">
-                        <option value="default">Default Fantasy</option>
-                        <option value="cyberpunk">Cyberpunk Theme</option>
-                    </select>
+                    <select class="rpg-preset-select" id="rpg-preset-dropdown"></select>
                     <button class="rpg-reset-btn" id="rpg-reset-btn">
                         <i class="fa-solid fa-rotate-right"></i> Reset
                     </button>
                 </div>
                 <div class="rpg-close-btn" id="rpg-close-btn"><i class="fa-solid fa-xmark"></i></div>
             </div>
-
-            <!-- โครงเปล่าๆ เดี๋ยว renderUI() จะมาเติมให้เอง -->
             <div class="rpg-tabs"></div>
             <div class="rpg-modal-content"></div>
-
         </div>
     `;
-    // แทรกลงใน body ของหน้าเว็บ
     $('body').append(modalHtml);
 
-    // 3. ผูก Event Listeners (ทำให้ปุ่มต่างๆ กดแล้วทำงาน)
-
-    // ปุ่มเปิด/ปิดหน้าต่าง
-    $('#rpg-status-toggle-btn').on('click', () => {
-        $('#rpg-status-modal').fadeToggle(200);
-    });
-
-    // ปุ่มปิด (กากบาท)
-    $('#rpg-close-btn').on('click', () => {
+    // ผูก Event ให้ปุ่มปิดหน้าต่าง (กากบาท)
+    document.getElementById('rpg-close-btn').addEventListener('click', () => {
         $('#rpg-status-modal').fadeOut(200);
     });
 
-    // ระบบสลับ Tab
-    $('.rpg-tab-btn').on('click', function() {
-        // ลบ class active จากปุ่มและเนื้อหาทั้งหมด
-        $('.rpg-tab-btn').removeClass('active');
-        $('.rpg-tab-content').removeClass('active');
-
-        // ใส่ class active ให้กับปุ่มที่ถูกกด
-        $(this).addClass('active');
-
-        // แสดงเนื้อหาของ Tab นั้น
-        const targetId = $(this).data('target');
-        $(`#${targetId}`).addClass('active');
-    });
-
-      // ปุ่ม Reset
-    $('#rpg-reset-btn').off('click').on('click', () => {
+    // ผูก Event ให้ปุ่ม Reset
+    document.getElementById('rpg-reset-btn').addEventListener('click', () => {
         if(confirm("คุณต้องการรีเซ็ตค่าสถานะทั้งหมดของ Preset นี้ ให้กลับเป็นค่าเริ่มต้นหรือไม่?")) {
-            const settings = extension_settings[extensionName];
             const currentPresetKey = settings.currentPreset;
             const presetLayout = settings.presets[currentPresetKey];
-
-            // สร้างกล่องข้อมูลใหม่เพื่อเก็บค่าเริ่มต้น
             const resetData = {};
 
-            // วนลูปดูว่าแต่ละ Module มีค่า default เป็นอะไร แล้วดึงมาใส่
             presetLayout.tabs.forEach(tab => {
                 tab.modules.forEach(module => {
-                    // ถ้าค่า default เป็น Array (เช่น ไอเทม) ต้องทำ Deep Copy เพื่อไม่ให้ข้อมูลผูกติดกัน
                     if (Array.isArray(module.default)) {
                         resetData[module.id] = JSON.parse(JSON.stringify(module.default));
                     } else {
-                        // ถ้าเป็นตัวเลข ก็ดึงค่า default มาใส่ได้เลย
                         resetData[module.id] = module.default;
                     }
                 });
             });
 
-            // นำข้อมูลเริ่มต้นไปทับข้อมูลปัจจุบัน
             settings.saveData[currentPresetKey] = resetData;
-
             console.log("[RPG Status] รีเซ็ตข้อมูลเรียบร้อยแล้ว!");
-
-            // วาดหน้าจอใหม่เพื่อให้ตัวเลขและไอเทมกลับไปเป็นค่าเริ่มต้น
             renderUI();
         }
     });
 
-    // เมื่อเปลี่ยน Preset ใน Dropdown
+    // ผูก Event ให้ Dropdown เปลี่ยน Preset
     $('#rpg-preset-dropdown').on('change', function() {
-        const selectedPreset = $(this).val();
-        extension_settings[extensionName].currentPreset = selectedPreset; // เซฟค่า
-        renderUI(); // วาดหน้าจอใหม่ตาม Preset ที่เลือก!
+        settings.currentPreset = $(this).val();
+        renderUI();
     });
 
+    // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
+    renderUI();
 }
 
 // ฟังก์ชันสำหรับตรวจสอบข้อความ AI ด้วย Regex
