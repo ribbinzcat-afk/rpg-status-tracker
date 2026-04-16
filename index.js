@@ -173,28 +173,35 @@ function setupUI() {
         // ส่วนที่ 1: สร้างปุ่มลอย (ที่เมนูด้านบน)
         // ==========================================
         const topMenu = document.getElementById('extensionsMenu');
-        if (!topMenu) throw new Error("ไม่พบ Element 'extensionsMenu' บนหน้าเว็บ");
+        if (!topMenu) throw new Error("ไม่พบ Element 'extensionsMenu'");
+
+        // เช็คก่อนว่ามีปุ่มเดิมอยู่ไหม ถ้ามีให้ลบทิ้งก่อน (ป้องกันปุ่มซ้ำซ้อนเวลารีเฟรช)
+        if (document.getElementById('rpg-status-floating-btn')) {
+            document.getElementById('rpg-status-floating-btn').remove();
+        }
 
         const floatingBtn = document.createElement('div');
         floatingBtn.id = 'rpg-status-floating-btn';
         floatingBtn.title = 'เปิดหน้าต่างสถานะตัวละคร';
         floatingBtn.innerHTML = '<i class="fa-solid fa-address-card"></i> Status';
-
         floatingBtn.style.display = settings.showFloatingButton ? 'inline-flex' : 'none';
 
         floatingBtn.addEventListener('click', () => {
             $('#rpg-status-modal').fadeToggle(200);
         });
         topMenu.appendChild(floatingBtn);
-        console.log(`[${extensionName}] ✅ สร้างปุ่มลอย (Top Menu) สำเร็จ`);
 
         // ==========================================
         // ส่วนที่ 2: สร้าง UI ในแผงควบคุม (Extensions Panel)
         // ==========================================
         const extensionPanel = document.getElementById('extensions_settings');
-        if (!extensionPanel) throw new Error("ไม่พบ Element 'extensions_settings' บนหน้าเว็บ");
+        if (!extensionPanel) throw new Error("ไม่พบ Element 'extensions_settings'");
+
+        // ลบของเก่าทิ้งก่อนถ้ามี
+        $('#rpg-extension-panel-block').remove();
 
         const panelContainer = document.createElement('div');
+        panelContainer.id = 'rpg-extension-panel-block';
         panelContainer.className = 'extension_settings_block';
         panelContainer.innerHTML = `<h4><i class="fa-solid fa-address-card"></i> RPG Status Tracker</h4>`;
 
@@ -215,7 +222,6 @@ function setupUI() {
             </label>
         `;
         panelContainer.appendChild(toggleContainer);
-
         extensionPanel.appendChild(panelContainer);
 
         document.getElementById('rpg-toggle-floating-btn').addEventListener('change', (e) => {
@@ -223,11 +229,13 @@ function setupUI() {
             settings.showFloatingButton = isChecked;
             floatingBtn.style.display = isChecked ? 'inline-flex' : 'none';
         });
-        console.log(`[${extensionName}] ✅ สร้างเมนูในแผงควบคุม (Extensions Panel) สำเร็จ`);
 
         // ==========================================
         // ส่วนที่ 3: สร้างหน้าต่างลอย (Modal)
         // ==========================================
+        // ลบหน้าต่างเก่าทิ้งก่อน (ถ้ามี)
+        $('#rpg-status-modal').remove();
+
         const modalHtml = `
             <div id="rpg-status-modal" style="display: none;">
                 <div class="rpg-modal-header">
@@ -240,56 +248,52 @@ function setupUI() {
                     <div class="rpg-close-btn" id="rpg-close-btn"><i class="fa-solid fa-xmark"></i></div>
                 </div>
 
-                <!-- ส่วนแสดงผลปกติ -->
                 <div class="rpg-tabs"></div>
                 <div class="rpg-modal-content"></div>
 
-                <!-- ส่วนแก้ไข JSON (ซ่อนไว้) -->
-                <div id="rpg-editor-container">
+                <div id="rpg-editor-container" style="display: none; flex-direction: column; flex-grow: 1; padding: 15px; background-color: rgba(0,0,0,0.5);">
                     <p style="margin: 0 0 5px 0; font-size: 0.85em; color: #aaa;">แก้ไขโครงสร้าง Tabs และ Modules (รูปแบบ JSON)</p>
-                    <textarea id="rpg-preset-editor" spellcheck="false"></textarea>
-                    <button id="rpg-save-preset-btn"><i class="fa-solid fa-floppy-disk"></i> บันทึก Preset</button>
+                    <textarea id="rpg-preset-editor" spellcheck="false" style="flex-grow: 1; width: 100%; min-height: 250px; background-color: #1e1e1e; color: #d4d4d4; border: 1px solid #444; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 0.9em; resize: vertical; white-space: pre;"></textarea>
+                    <button id="rpg-save-preset-btn" style="margin-top: 10px; background-color: #5cb85c; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold;"><i class="fa-solid fa-floppy-disk"></i> บันทึก Preset</button>
                 </div>
             </div>
         `;
-        $('body').append(modalHtml);
+        $('body').append(modalHtml); // สร้าง HTML ลงบนจอ
 
-        document.getElementById('rpg-close-btn').addEventListener('click', () => {
-            $('#rpg-status-modal').fadeOut(200);
+        // ==========================================
+        // ส่วนที่ 4: ผูกคำสั่งให้ปุ่มต่างๆ (Event Listeners)
+        // ==========================================
+
+        // ปุ่มปิดหน้าต่าง (กากบาท)
+        $('#rpg-close-btn').on('click', () => $('#rpg-status-modal').fadeOut(200));
+
+        // Dropdown เปลี่ยน Preset
+        $('#rpg-preset-dropdown').on('change', function() {
+            settings.currentPreset = $(this).val();
+            renderUI();
         });
 
-        document.getElementById('rpg-reset-btn').addEventListener('click', () => {
+        // ปุ่ม Reset ข้อมูล
+        $('#rpg-reset-btn').on('click', () => {
             if(confirm("คุณต้องการรีเซ็ตค่าสถานะทั้งหมดของ Preset นี้ ให้กลับเป็นค่าเริ่มต้นหรือไม่?")) {
-                const currentPresetKey = settings.currentPreset;
-                const presetLayout = settings.presets[currentPresetKey];
+                const currentKey = settings.currentPreset;
                 const resetData = {};
-
-                presetLayout.tabs.forEach(tab => {
+                settings.presets[currentKey].tabs.forEach(tab => {
                     tab.modules.forEach(module => {
-                        if (Array.isArray(module.default)) {
-                            resetData[module.id] = JSON.parse(JSON.stringify(module.default));
-                        } else {
-                            resetData[module.id] = module.default;
-                        }
+                        resetData[module.id] = Array.isArray(module.default) ? JSON.parse(JSON.stringify(module.default)) : module.default;
                     });
                 });
+                settings.saveData[currentKey] = resetData;
+                renderUI();
+            }
+        });
 
-                settings.saveData[currentPresetKey] = resetData;
-                console.log(`[${extensionName}] 🔄 รีเซ็ตข้อมูลเรียบร้อยแล้ว!`);
-
-                        // ----------------------------------------------------
-        // ระบบสร้างและแก้ไข Preset
-        // ----------------------------------------------------
-
-        // 1. ปุ่ม "+" สร้าง Preset ใหม่
-        document.getElementById('rpg-new-preset-btn').addEventListener('click', () => {
+        // 🌟 ปุ่ม "+" สร้าง Preset ใหม่
+        $('#rpg-new-preset-btn').on('click', () => {
             const presetName = prompt("ตั้งชื่อ Preset ใหม่ของคุณ:");
-            if (!presetName) return; // ถ้ายกเลิกหรือไม่พิมพ์อะไรเลย
+            if (!presetName) return;
 
-            // สร้าง ID จากชื่อ (ตัวเล็กหมด ไม่มีเว้นวรรค)
             const presetId = "custom_" + Date.now();
-
-            // สร้างโครงสร้างเริ่มต้น (มี 1 Tab เปล่าๆ)
             settings.presets[presetId] = {
                 id: presetId,
                 name: presetName,
@@ -303,78 +307,53 @@ function setupUI() {
                     }
                 ]
             };
-            settings.saveData[presetId] = { hp: 100 }; // ข้อมูลเซฟเริ่มต้น
-
-            settings.currentPreset = presetId; // สลับไปใช้ Preset ใหม่ทันที
+            settings.saveData[presetId] = { hp: 100 };
+            settings.currentPreset = presetId;
             renderUI();
-            console.log(`[${extensionName}] 🆕 สร้าง Preset ใหม่: ${presetName}`);
         });
 
-        // 2. ปุ่ม "✏️" เปิดหน้าต่างแก้ไข JSON
-        document.getElementById('rpg-edit-preset-btn').addEventListener('click', () => {
-            const currentPresetKey = settings.currentPreset;
-            const tabsData = settings.presets[currentPresetKey].tabs;
+        // 🌟 ปุ่ม "✏️" เปิดหน้าต่างแก้ไข JSON
+        $('#rpg-edit-preset-btn').on('click', () => {
+            const currentKey = settings.currentPreset;
+            const tabsData = settings.presets[currentKey].tabs;
 
-            // แปลง Object เป็นข้อความ JSON สวยๆ (ย่อหน้า 4 spaces)
-            document.getElementById('rpg-preset-editor').value = JSON.stringify(tabsData, null, 4);
+            $('#rpg-preset-editor').val(JSON.stringify(tabsData, null, 4));
 
-            // ซ่อนหน้าจอปกติ และแสดงหน้าจอ Editor
             $('.rpg-tabs, .rpg-modal-content').hide();
             $('#rpg-editor-container').css('display', 'flex');
         });
 
-        // 3. ปุ่ม "💾" บันทึก JSON ที่แก้ไข
-        document.getElementById('rpg-save-preset-btn').addEventListener('click', () => {
+        // 🌟 ปุ่ม "💾" บันทึก JSON ที่แก้ไข
+        $('#rpg-save-preset-btn').on('click', () => {
             try {
-                const currentPresetKey = settings.currentPreset;
-                const editorValue = document.getElementById('rpg-preset-editor').value;
-
-                // แปลงข้อความกลับเป็น Object
+                const currentKey = settings.currentPreset;
+                const editorValue = $('#rpg-preset-editor').val();
                 const newTabsData = JSON.parse(editorValue);
 
-                // บันทึกทับโครงสร้างเดิม
-                settings.presets[currentPresetKey].tabs = newTabsData;
+                settings.presets[currentKey].tabs = newTabsData;
 
-                // ตรวจสอบว่ามี Module ใหม่ถูกสร้างขึ้นไหม ถ้ามีให้ใส่ค่า default ลงใน saveData ด้วย
                 newTabsData.forEach(tab => {
                     tab.modules.forEach(mod => {
-                        if (settings.saveData[currentPresetKey][mod.id] === undefined) {
-                            settings.saveData[currentPresetKey][mod.id] = Array.isArray(mod.default) ? [] : mod.default;
+                        if (settings.saveData[currentKey][mod.id] === undefined) {
+                            settings.saveData[currentKey][mod.id] = Array.isArray(mod.default) ? [] : mod.default;
                         }
                     });
                 });
 
-                // ซ่อน Editor และกลับไปแสดงหน้าจอปกติ
                 $('#rpg-editor-container').hide();
                 $('.rpg-tabs, .rpg-modal-content').show();
-
-                renderUI(); // วาดหน้าจอใหม่
-                console.log(`[${extensionName}] 💾 บันทึก Preset สำเร็จ!`);
+                renderUI();
 
             } catch (error) {
-                // ถ้าผู้ใช้พิมพ์ JSON ผิดพลาด (เช่น ลืมลูกน้ำ, ปีกกาไม่ครบ)
-                alert("เกิดข้อผิดพลาด! รูปแบบ JSON ไม่ถูกต้อง กรุณาตรวจสอบลูกน้ำ (,) หรือปีกกา ({}) ให้ครบถ้วน\n\nรายละเอียด: " + error.message);
+                alert("เกิดข้อผิดพลาด! รูปแบบ JSON ไม่ถูกต้อง\n\nรายละเอียด: " + error.message);
             }
         });
-
-                renderUI();
-            }
-        });
-
-        $('#rpg-preset-dropdown').on('change', function() {
-            settings.currentPreset = $(this).val();
-            console.log(`[${extensionName}] 🔄 เปลี่ยน Preset เป็น: ${settings.currentPreset}`);
-            renderUI();
-        });
-
-        console.log(`[${extensionName}] ✅ สร้างหน้าต่าง Modal สำเร็จ`);
 
         // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
         renderUI();
         console.log(`[${extensionName}] 🎉 โหลด UI ทั้งหมดเสร็จสมบูรณ์!`);
 
     } catch (error) {
-        // ดักจับ Error และแจ้งเตือนให้ชัดเจน
         console.error(`[${extensionName}] ❌ เกิดข้อผิดพลาดในการสร้าง UI:`, error);
     }
 }
