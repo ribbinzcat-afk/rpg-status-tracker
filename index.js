@@ -387,10 +387,6 @@ async function handleIncomingMessage() {
         const cleanedText = text.replace(match[0], '').trim();
         lastMessage.mes = cleanedText;
 
-        // นำเข้าฟังก์ชันบันทึกแชทจาก script.js เพื่อให้ข้อความที่ถูกลบแท็กไปแล้ว ถูกเซฟลงระบบ
-        const { saveChatDebounced, reloadCurrentChat } = await import("../../../../script.js");
-        saveChatDebounced();
-
         // 5. อัปเดตหน้าต่าง UI สถานะของเรา!
         renderUI();
         console.log(`[${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว!`);
