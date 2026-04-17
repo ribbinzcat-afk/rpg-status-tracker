@@ -311,6 +311,7 @@ function setupUI() {
             </label>
         `;
         panelContainer.appendChild(toggleContainer);
+        extensionPanel.appendChild(panelContainer);
 
         // คำสั่งของปุ่มเมนูบน (ของเดิม)
         document.getElementById('rpg-toggle-floating-btn').addEventListener('change', (e) => {
