@@ -104,23 +104,39 @@
 .rpg-tabs {
     display: flex;
     background: transparent;
-    padding: 5px 10px;
-    gap: 5px;
-    overflow-x: auto;
+    padding: 10px 15px; /* เพิ่มพื้นที่ว่างด้านบน-ล่างให้แท็บ */
+    gap: 8px;
+    overflow-x: auto; /* เลื่อนซ้ายขวาได้ถ้าแท็บเยอะ */
+
+    /* ซ่อน Scrollbar ให้ดูสวยงามแบบมือถือ */
+    scrollbar-width: none; /* สำหรับ Firefox */
 }
+.rpg-tabs::-webkit-scrollbar {
+    display: none; /* สำหรับ Chrome/Safari */
+}
+
 .rpg-tab-btn {
     flex: 1;
-    padding: 8px;
+    flex-shrink: 0; /* 🌟 ป้องกันไม่ให้ปุ่มโดนบีบจนแบน */
+    min-width: 80px; /* 🌟 บังคับความกว้างขั้นต่ำ ตัวหนังสือจะได้ไม่หาย */
+    min-height: 35px; /* 🌟 บังคับความสูงของปุ่ม */
+
+    padding: 8px 12px;
     border-radius: 15px;
     cursor: pointer;
     border: 1px solid transparent;
     background: var(--holo-card);
     color: var(--holo-text);
-    font-size: 0.85em;
+    font-size: 0.9em; /* ขยายตัวหนังสือขึ้นนิดนึง */
     font-weight: bold;
     transition: 0.2s;
-    white-space: nowrap;
+    white-space: nowrap; /* ห้ามตัวหนังสือตัดขึ้นบรรทัดใหม่ */
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
 .rpg-tab-btn.active {
     background: var(--holo-accent);
     color: white;
