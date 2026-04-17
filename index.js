@@ -150,9 +150,20 @@ function generateStatusPrompt() {
                 if (module.max !== undefined) text += `/${module.max}`;
                 tabData.push(text);
             }
+            // --- กรณีเป็น Module แบบ ตัวเลข+คำบรรยาย (Complex) ---
             else if (module.type === "complex") {
                 if (Array.isArray(val) && val.length > 0) {
-                    const itemsText = val.map(item => `${item.name}(x${item.amount})`).join(', ');
+                    const itemsText = val.map(item => {
+                        // เริ่มต้นด้วย ชื่อ(xจำนวน)
+                        let text = `${item.name}(x${item.amount})`;
+
+                        // ถ้ามีคำอธิบาย (desc) ให้เอามาต่อท้ายในวงเล็บเหลี่ยม
+                        if (item.desc && item.desc.trim() !== "") {
+                            text += ` [${item.desc}]`;
+                        }
+                        return text;
+                    }).join(', ');
+
                     tabData.push(`${module.name.split(' ')[0]}: ${itemsText}`);
                 } else {
                     tabData.push(`${module.name.split(' ')[0]}: Empty`);
