@@ -14,6 +14,7 @@ const extensionName = "rpg-status-tracker";
 const defaultSettings = {
     currentPreset: "fantasy", // Preset ที่กำลังใช้งานอยู่
     showFloatingButton: true,
+    theme: "dark",
 
     // 1. ส่วนโครงสร้าง UI (Layout)
     presets: {
@@ -285,6 +286,7 @@ function setupUI() {
                 <div class="rpg-modal-header">
                     <div class="rpg-header-controls">
                         <select class="rpg-preset-select" id="rpg-preset-dropdown"></select>
+                        <button class="rpg-icon-btn" id="rpg-theme-btn" title="สลับโหมดสว่าง/มืด"><i class="fa-solid fa-moon"></i></button>
                         <button class="rpg-icon-btn" id="rpg-new-preset-btn" title="สร้าง Preset ใหม่"><i class="fa-solid fa-plus"></i></button>
                         <button class="rpg-icon-btn" id="rpg-edit-preset-btn" title="แก้ไขโครงสร้าง Preset"><i class="fa-solid fa-pen"></i></button>
                         <button class="rpg-icon-btn" id="rpg-delete-preset-btn" title="ลบ Preset นี้" style="color: #ff6b6b;"><i class="fa-solid fa-trash"></i></button>
@@ -356,6 +358,28 @@ function setupUI() {
             settings.currentPreset = presetId;
             renderUI();
         });
+
+                // 🌟 ปุ่มสลับธีม (Light/Dark Mode)
+        $('#rpg-theme-btn').on('click', () => {
+            const modal = $('#rpg-status-modal');
+            const icon = $('#rpg-theme-btn i');
+
+            if (settings.theme === "dark") {
+                settings.theme = "light";
+                modal.addClass('rpg-light-mode');
+                icon.removeClass('fa-moon').addClass('fa-sun');
+            } else {
+                settings.theme = "dark";
+                modal.removeClass('rpg-light-mode');
+                icon.removeClass('fa-sun').addClass('fa-moon');
+            }
+        });
+
+        // เซ็ตธีมเริ่มต้นตอนเปิดหน้าต่างครั้งแรก
+        if (settings.theme === "light") {
+            $('#rpg-status-modal').addClass('rpg-light-mode');
+            $('#rpg-theme-btn i').removeClass('fa-moon').addClass('fa-sun');
+        }
 
         // 🌟 ปุ่ม "✏️" เปิดหน้าต่างแก้ไข JSON
         $('#rpg-edit-preset-btn').on('click', () => {
@@ -679,34 +703,33 @@ function renderUI() {
                 tabContentHtml += `</div>`;
             }
 
-            // 🌟 [ใหม่] วาดหน้าจอ Profile
+            // 🌟 วาดหน้าจอ Profile (ดีไซน์ใหม่)
             else if (module.type === "profile") {
-                tabContentHtml += `<div style="background: rgba(0,0,0,0.2); border-left: 4px solid #f0ad4e; padding: 10px; border-radius: 4px;">`;
+                tabContentHtml += `<div class="rpg-profile-grid">`;
                 if (typeof currentValue === 'object' && currentValue !== null && Object.keys(currentValue).length > 0) {
-                    // สร้างตาราง 2 คอลัมน์แบบง่ายๆ
-                    tabContentHtml += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">`;
                     for (const [statKey, statValue] of Object.entries(currentValue)) {
-                        tabContentHtml += `<div><span style="color:#aaa; font-size:0.85em;">${statKey}:</span> <br><b>${statValue}</b></div>`;
+                        tabContentHtml += `
+                            <div class="rpg-profile-stat">
+                                <div class="rpg-stat-label">${statKey}</div>
+                                <div class="rpg-stat-value">${statValue}</div>
+                            </div>`;
                     }
-                    tabContentHtml += `</div>`;
                 } else {
                     tabContentHtml += `<div class="rpg-empty-text">- ไม่มีข้อมูลสเตตัส -</div>`;
                 }
                 tabContentHtml += `</div>`;
             }
 
-            // 🌟 [ใหม่] วาดหน้าจอ Chat
+            // 🌟 วาดหน้าจอ Chat (ดีไซน์ใหม่)
             else if (module.type === "chat") {
-                // ทำกล่องให้ Scroll ได้
-                tabContentHtml += `<div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">`;
+                tabContentHtml += `<div class="rpg-chat-container">`;
                 if (Array.isArray(currentValue) && currentValue.length > 0) {
                     currentValue.forEach(msg => {
                         tabContentHtml += `
-                            <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; border-top-left-radius: 0;">
-                                <div style="font-size: 0.8em; color: #5bc0de; font-weight: bold; margin-bottom: 2px;">${msg.sender}</div>
-                                <div style="font-size: 0.9em;">${msg.message}</div>
-                            </div>
-                        `;
+                            <div class="rpg-chat-bubble">
+                                <div style="color: var(--holo-accent); font-weight: bold; margin-bottom: 3px; font-size: 0.9em;">${msg.sender}</div>
+                                <div>${msg.message}</div>
+                            </div>`;
                     });
                 } else {
                     tabContentHtml += `<div class="rpg-empty-text">- ไม่มีข้อความใหม่ -</div>`;
