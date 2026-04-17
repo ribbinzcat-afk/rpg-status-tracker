@@ -498,7 +498,7 @@ async function handleIncomingMessage() {
         // 5. อัปเดตหน้าต่าง UI สถานะของเรา!
         renderUI();
         console.log(`[${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว!`);
-        triggerSlash(`/echo severity=success [${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว!`);
+        triggerSlash(`/pass [${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว! | /echo severity=success`);
 
         // 6. บังคับรีเฟรชหน้าแชท 1 ครั้ง เพื่อให้ข้อความ <update> หายไปจากหน้าจอจริงๆ
         // (หน่วงเวลาเล็กน้อยเพื่อให้ระบบเซฟแชทเสร็จก่อน)
