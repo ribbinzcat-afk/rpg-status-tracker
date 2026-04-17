@@ -195,6 +195,12 @@
     border-radius: 8px;
     border-left: 3px solid var(--holo-accent);
 }
+
+/* 🌟 [เพิ่มโค้ดนี้ครับ] ถ้าไอเทมตัวสุดท้ายเป็นเลขคี่ (ไม่มีคู่) ให้ขยายเต็ม 2 คอลัมน์ 🌟 */
+.rpg-profile-stat:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
+
 .rpg-light-mode .rpg-profile-stat { background: rgba(255,255,255,0.5); }
 .rpg-stat-label { font-size: 0.75em; opacity: 0.7; }
 .rpg-stat-value { font-weight: bold; font-size: 0.9em; }
