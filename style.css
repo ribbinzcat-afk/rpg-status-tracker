@@ -132,9 +132,19 @@
     padding: 15px;
     overflow-y: auto;
     flex-grow: 1;
-    display: flex;
     flex-direction: column;
     gap: 15px;
+}
+
+/* 🌟 [เพิ่มใหม่] ควบคุมการซ่อน/แสดงของแต่ละแท็บ 🌟 */
+.rpg-tab-content {
+    display: none; /* ซ่อนทุกแท็บไว้ก่อน */
+    flex-direction: column;
+    gap: 15px;
+}
+
+.rpg-tab-content.active {
+    display: flex; /* แสดงเฉพาะแท็บที่ถูกกด (มีคลาส active) */
 }
 
 /* =========================================
