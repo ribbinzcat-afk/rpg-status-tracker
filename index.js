@@ -553,6 +553,47 @@ function setupUI() {
             }
         });
 
+        // 🌟 ระบบพิมพ์แชทตอบกลับ (Interactive Chat)
+        // ใช้ Event Delegation เพราะช่องพิมพ์ถูกสร้างใหม่เรื่อยๆ
+        $('.rpg-modal-content').off('click', '.rpg-chat-send-btn').on('click', '.rpg-chat-send-btn', function() {
+            const moduleId = $(this).data('module');
+            const inputField = $(`.rpg-chat-input[data-module="${moduleId}"]`);
+            const message = inputField.val().trim();
+
+            if (message) {
+                const currentKey = settings.currentPreset;
+
+                // ถ้ายังไม่มีประวัติแชท ให้สร้าง Array เปล่าๆ ก่อน
+                if (!Array.isArray(settings.saveData[currentKey][moduleId])) {
+                    settings.saveData[currentKey][moduleId] = [];
+                }
+
+                // ดันข้อความของเราเข้าไป (ใส่ flag isUser: true เพื่อให้รู้ว่าเป็นเรา)
+                settings.saveData[currentKey][moduleId].push({
+                    sender: "User",
+                    message: message,
+                    isUser: true
+                });
+
+                // ล้างช่องพิมพ์ และวาดหน้าจอใหม่
+                inputField.val('');
+                renderUI();
+
+                // สั่งให้กล่องแชทเลื่อนลงมาล่างสุดอัตโนมัติ
+                const chatContainer = $(`#chat-container-${moduleId}`);
+                if (chatContainer.length) {
+                    chatContainer.scrollTop(chatContainer[0].scrollHeight);
+                }
+            }
+        });
+
+        // 🌟 ให้กด Enter เพื่อส่งข้อความได้ด้วย
+        $('.rpg-modal-content').off('keypress', '.rpg-chat-input').on('keypress', '.rpg-chat-input', function(e) {
+            if (e.which == 13) { // เลข 13 คือปุ่ม Enter
+                $(this).siblings('.rpg-chat-send-btn').click();
+            }
+        });
+
         // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
         renderUI();
         console.log(`[${extensionName}] 🎉 โหลด UI ทั้งหมดเสร็จสมบูรณ์!`);
@@ -859,14 +900,20 @@ function renderUI() {
                 tabContentHtml += `</div>`;
             }
 
-            // 🌟 วาดหน้าจอ Chat (ดีไซน์ใหม่)
+            // 🌟 วาดหน้าจอ Chat (มีช่องพิมพ์ตอบกลับ)
             else if (module.type === "chat") {
-                tabContentHtml += `<div class="rpg-chat-container">`;
+                // 1. วาดกล่องข้อความ
+                tabContentHtml += `<div class="rpg-chat-container" id="chat-container-${module.id}">`;
                 if (Array.isArray(currentValue) && currentValue.length > 0) {
                     currentValue.forEach(msg => {
+                        // เช็คว่าเป็นข้อความเรา หรือข้อความ NPC
+                        const isUserClass = msg.isUser ? "rpg-user-msg" : "";
+                        const senderName = msg.isUser ? "คุณ (You)" : msg.sender;
+                        const senderColor = msg.isUser ? "#2ecc71" : "var(--holo-accent)";
+
                         tabContentHtml += `
-                            <div class="rpg-chat-bubble">
-                                <div style="color: var(--holo-accent); font-weight: bold; margin-bottom: 3px; font-size: 0.9em;">${msg.sender}</div>
+                            <div class="rpg-chat-bubble ${isUserClass}">
+                                <div style="color: ${senderColor}; font-weight: bold; margin-bottom: 3px; font-size: 0.9em;">${senderName}</div>
                                 <div>${msg.message}</div>
                             </div>`;
                     });
@@ -874,6 +921,14 @@ function renderUI() {
                     tabContentHtml += `<div class="rpg-empty-text">- ไม่มีข้อความใหม่ -</div>`;
                 }
                 tabContentHtml += `</div>`;
+
+                // 2. วาดช่องพิมพ์ข้อความ
+                tabContentHtml += `
+                    <div class="rpg-chat-input-area">
+                        <input type="text" class="rpg-chat-input" data-module="${module.id}" placeholder="พิมพ์ตอบกลับ...">
+                        <button class="rpg-chat-send-btn" data-module="${module.id}"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                `;
             }
 
                         // 🌟 [ใหม่] วาดหน้าจอ Skill
