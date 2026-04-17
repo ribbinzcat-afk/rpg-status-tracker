@@ -205,7 +205,9 @@
 .rpg-stat-label { font-size: 0.75em; opacity: 0.7; }
 .rpg-stat-value { font-weight: bold; font-size: 0.9em; }
 
-/* แชท (Chat Bubble) */
+/* =========================================
+   แชท (Chat Bubble) & ระบบพิมพ์ตอบกลับ
+   ========================================= */
 .rpg-chat-container {
     max-height: 250px;
     overflow-y: auto;
@@ -213,7 +215,10 @@
     flex-direction: column;
     gap: 10px;
     padding-right: 5px;
+    margin-bottom: 10px; /* เว้นที่ให้ช่องพิมพ์ด้านล่าง */
 }
+
+/* ข้อความของ NPC (ชิดซ้าย) */
 .rpg-chat-bubble {
     background: var(--holo-chat-bg);
     padding: 10px;
@@ -221,7 +226,55 @@
     border-top-left-radius: 2px;
     font-size: 0.85em;
     line-height: 1.4;
+    align-self: flex-start;
+    max-width: 85%;
 }
+
+/* 🌟 ข้อความของเราเอง (ชิดขวา สีเขียว) */
+.rpg-chat-bubble.rpg-user-msg {
+    background: rgba(46, 204, 113, 0.2);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 2px;
+    align-self: flex-end;
+    text-align: right;
+}
+
+/* 🌟 ช่องพิมพ์ข้อความด้านล่าง */
+.rpg-chat-input-area {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 10px;
+}
+
+.rpg-chat-input {
+    flex-grow: 1;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--holo-border);
+    color: var(--holo-text);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    outline: none;
+    transition: 0.2s;
+}
+.rpg-chat-input:focus { border-color: var(--holo-accent); }
+
+.rpg-chat-send-btn {
+    background: var(--holo-accent);
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s;
+}
+.rpg-chat-send-btn:hover { transform: scale(1.1); }
 
 /* ปุ่มลอยด้านบน (เปิดหน้าต่าง) */
 #rpg-status-floating-btn {
