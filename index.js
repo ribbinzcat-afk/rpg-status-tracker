@@ -193,11 +193,20 @@ function generateStatusPrompt() {
                 }
             }
 
-                        // 🌟 [ใหม่] ส่งข้อมูล Skill ให้ AI
+            // 🌟 [แก้ไข] ส่งข้อมูล Skill ให้ AI (เพิ่มคำอธิบาย desc)
             else if (module.type === "skill") {
                 if (Array.isArray(val) && val.length > 0) {
-                    // ส่งไปแบบ: สกิล: ลูกไฟ(Lv.1) [สถานะ: พร้อมใช้งาน]
-                    const skillsText = val.map(s => `${s.name}(Lv.${s.level || 1}) [สถานะ: ${s.status}]`).join(', ');
+                    const skillsText = val.map(s => {
+                        // เริ่มต้นด้วย ชื่อ(Lv.) [สถานะ]
+                        let text = `${s.name}(Lv.${s.level || 1}) [สถานะ: ${s.status || "พร้อมใช้งาน"}]`;
+
+                        // ถ้ามีคำอธิบาย ให้เอามาต่อท้าย
+                        if (s.desc && s.desc.trim() !== "") {
+                            text += ` - ${s.desc}`;
+                        }
+                        return text;
+                    }).join(', ');
+
                     tabData.push(`${module.name.split(' ')[0]}: ${skillsText}`);
                 } else {
                     tabData.push(`${module.name.split(' ')[0]}: Empty`);
