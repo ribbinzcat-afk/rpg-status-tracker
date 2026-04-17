@@ -615,6 +615,81 @@ function setupUI() {
             }
         });
 
+         // 🌟 ระบบ Social Media (โพสต์, คอมเมนต์, ไลก์)
+
+        // 1. ปุ่มสร้างโพสต์ใหม่
+        $('.rpg-modal-content').off('click', '.rpg-social-post-btn').on('click', '.rpg-social-post-btn', function() {
+            // เช็คว่าไม่ใช่ปุ่มคอมเมนต์นะ
+            if ($(this).hasClass('rpg-send-comment-btn')) return;
+
+            const moduleId = $(this).data('module');
+            const container = $(this).closest('.rpg-social-create-box');
+
+            const author = container.find('.rpg-post-author').val().trim() || "User";
+            const attach = container.find('.rpg-post-attach').val().trim();
+            const message = container.find('.rpg-post-msg').val().trim();
+
+            if (message) {
+                const currentKey = settings.currentPreset;
+                if (!Array.isArray(settings.saveData[currentKey][moduleId])) settings.saveData[currentKey][moduleId] = [];
+
+                settings.saveData[currentKey][moduleId].push({
+                    id: "post_" + Date.now(),
+                    author: author,
+                    message: message,
+                    attachment: attach,
+                    likes: 0,
+                    comments: []
+                });
+
+                renderUI(); // วาดหน้าจอใหม่
+            }
+        });
+
+        // 2. ปุ่มส่งคอมเมนต์
+        $('.rpg-modal-content').off('click', '.rpg-send-comment-btn').on('click', '.rpg-send-comment-btn', function() {
+            const moduleId = $(this).data('module');
+            const targetAuthor = $(this).data('postauthor');
+            const inputField = $(this).siblings('.rpg-comment-input');
+            const commentMsg = inputField.val().trim();
+
+            if (commentMsg) {
+                const currentKey = settings.currentPreset;
+                const posts = settings.saveData[currentKey][moduleId];
+
+                // หาโพสต์ล่าสุดของคนๆ นั้น (reverse เพื่อหาอันใหม่สุด)
+                const targetPost = [...posts].reverse().find(p => p.author === targetAuthor);
+
+                if (targetPost) {
+                    if (!targetPost.comments) targetPost.comments = [];
+                    targetPost.comments.push({ author: "คุณ", message: commentMsg });
+                    renderUI();
+                }
+            }
+        });
+
+        // 3. ปุ่มกด Like ❤️
+        $('.rpg-modal-content').off('click', '.rpg-like-btn').on('click', '.rpg-like-btn', function() {
+            const moduleId = $(this).data('module');
+            const postId = $(this).data('postid');
+            const currentKey = settings.currentPreset;
+
+            const posts = settings.saveData[currentKey][moduleId];
+            const targetPost = posts.find(p => p.id === postId);
+
+            if (targetPost) {
+                // ถ้าปุ่มยังไม่เป็นสีแดง ให้บวกไลก์ ถ้าแดงแล้วให้ลบไลก์ (Unlike)
+                if (!$(this).hasClass('liked')) {
+                    targetPost.likes = (targetPost.likes || 0) + 1;
+                    $(this).addClass('liked');
+                } else {
+                    targetPost.likes = Math.max(0, (targetPost.likes || 0) - 1);
+                    $(this).removeClass('liked');
+                }
+                $(this).find('.like-count').text(targetPost.likes);
+            }
+        });
+
         // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
         renderUI();
         console.log(`[${extensionName}] 🎉 โหลด UI ทั้งหมดเสร็จสมบูรณ์!`);
@@ -1022,6 +1097,83 @@ function renderUI() {
                     });
                 } else {
                     tabContentHtml += `<div class="rpg-empty-text">- ไม่มีทักษะ -</div>`;
+                }
+                tabContentHtml += `</div>`;
+            }
+
+                        // 🌟 วาดหน้าจอ Social Media
+            else if (module.type === "social") {
+                tabContentHtml += `<div class="rpg-social-container" id="social-container-${module.id}">`;
+
+                // 1. กล่องสำหรับให้เราสร้างโพสต์เอง
+                tabContentHtml += `
+                    <div class="rpg-social-create-box">
+                        <div style="font-size: 0.85em; font-weight: bold; color: var(--holo-accent);">สร้างโพสต์ใหม่</div>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" class="rpg-social-input rpg-post-author" placeholder="ชื่อแอคเคาท์ (เช่น User)" style="width: 40%;">
+                            <input type="text" class="rpg-social-input rpg-post-attach" placeholder="คำบรรยายรูป (ไม่บังคับ)" style="width: 60%;">
+                        </div>
+                        <textarea class="rpg-social-input rpg-post-msg" placeholder="คุณกำลังคิดอะไรอยู่?" rows="2" style="resize: none;"></textarea>
+                        <button class="rpg-social-post-btn" data-module="${module.id}"><i class="fa-solid fa-paper-plane"></i> โพสต์เลย!</button>
+                    </div>
+                `;
+
+                // 2. วาดไทม์ไลน์ (เรียงจากโพสต์ใหม่ล่าสุดไปเก่าสุด)
+                if (Array.isArray(currentValue) && currentValue.length > 0) {
+                    // ก๊อปปี้ array แล้ว reverse() เพื่อให้โพสต์ใหม่อยู่บนสุด
+                    const reversedPosts = [...currentValue].reverse();
+
+                    reversedPosts.forEach((post, index) => {
+                        // ดึงตัวอักษรแรกของชื่อมาทำเป็นโลโก้ Avatar
+                        const initial = post.author ? post.author.charAt(0).toUpperCase() : "?";
+
+                        tabContentHtml += `
+                            <div class="rpg-social-post">
+                                <div class="rpg-social-header">
+                                    <div class="rpg-social-avatar">${initial}</div>
+                                    <span>${post.author}</span>
+                                </div>
+                                <div class="rpg-social-message">${post.message}</div>
+                        `;
+
+                        // ถัามีกล่องรูปภาพ/คำบรรยาย ให้วาดด้วย
+                        if (post.attachment) {
+                            tabContentHtml += `<div class="rpg-social-attachment"><i class="fa-solid fa-image"></i> ${post.attachment}</div>`;
+                        }
+
+                        // ปุ่ม Like
+                        tabContentHtml += `
+                                <div class="rpg-social-actions">
+                                    <div class="rpg-like-btn" data-module="${module.id}" data-postid="${post.id}">
+                                        <i class="fa-solid fa-heart"></i> <span class="like-count">${post.likes || 0}</span>
+                                    </div>
+                                    <div style="color: #aaa; font-size: 0.9em;"><i class="fa-solid fa-comment"></i> ${post.comments ? post.comments.length : 0}</div>
+                                </div>
+                        `;
+
+                        // โซนคอมเมนต์
+                        tabContentHtml += `<div class="rpg-social-comments">`;
+                        if (post.comments && post.comments.length > 0) {
+                            post.comments.forEach(c => {
+                                tabContentHtml += `
+                                    <div class="rpg-comment-item">
+                                        <span class="rpg-comment-author">${c.author}:</span> ${c.message}
+                                    </div>`;
+                            });
+                        }
+
+                        // ช่องให้เราพิมพ์คอมเมนต์
+                        tabContentHtml += `
+                                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                    <input type="text" class="rpg-social-input rpg-comment-input" placeholder="แสดงความคิดเห็น..." style="flex-grow: 1; padding: 5px 10px;">
+                                    <button class="rpg-social-post-btn rpg-send-comment-btn" data-module="${module.id}" data-postauthor="${post.author}" style="padding: 5px 10px;"><i class="fa-solid fa-reply"></i></button>
+                                </div>
+                            </div> <!-- ปิดโซนคอมเมนต์ -->
+                        </div> <!-- ปิดการ์ดโพสต์ -->
+                        `;
+                    });
+                } else {
+                    tabContentHtml += `<div class="rpg-empty-text" style="text-align:center; margin-top: 20px;">- ยังไม่มีความเคลื่อนไหว -</div>`;
                 }
                 tabContentHtml += `</div>`;
             }
