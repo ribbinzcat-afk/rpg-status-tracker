@@ -1,4 +1,197 @@
-/* ปุ่มเปิดหน้าต่างสถานะ (จะไปอยู่ตรงเมนูด้านบน) */
+/* =========================================
+   ตัวแปรสีสำหรับ Dark Mode (ค่าเริ่มต้น)
+   ========================================= */
+#rpg-status-modal {
+    --holo-bg: rgba(15, 20, 30, 0.85);
+    --holo-border: rgba(0, 255, 255, 0.4);
+    --holo-text: #e0f7fa;
+    --holo-card: rgba(0, 0, 0, 0.5);
+    --holo-glow: 0 0 20px rgba(0, 255, 255, 0.2);
+    --holo-accent: #00e5ff;
+    --holo-chat-bg: rgba(0, 255, 255, 0.1);
+}
+
+/* =========================================
+   ตัวแปรสีสำหรับ Light Mode
+   ========================================= */
+#rpg-status-modal.rpg-light-mode {
+    --holo-bg: rgba(245, 247, 250, 0.9);
+    --holo-border: rgba(150, 150, 150, 0.4);
+    --holo-text: #2c3e50;
+    --holo-card: rgba(255, 255, 255, 0.7);
+    --holo-glow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --holo-accent: #2980b9;
+    --holo-chat-bg: rgba(41, 128, 185, 0.1);
+}
+
+/* =========================================
+   โครงสร้างหลัก (Holo-Phone)
+   ========================================= */
+#rpg-status-modal {
+    display: none;
+    position: fixed;
+    /* เปลี่ยนวิธีจัดกึ่งกลาง เพื่อให้รองรับการลาก (Draggable) */
+    top: 10vh;
+    left: calc(50vw - 180px); /* 180px คือครึ่งนึงของความกว้าง 360px */
+
+    width: 360px;
+    height: 700px;
+    max-height: 85vh;
+
+    background-color: var(--holo-bg);
+    backdrop-filter: blur(12px);
+    color: var(--holo-text);
+    border: 1px solid var(--holo-border);
+    border-radius: 35px;
+    box-shadow: var(--holo-glow);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease; /* เอา transform ออกจาก transition ไม่งั้นตอนลากจะหน่วง */
+}
+
+/* รอยบากมือถือ (Notch) ด้านบน */
+#rpg-status-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 20px;
+    background-color: rgba(0,0,0,0.8);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    z-index: 10;
+}
+
+/* ส่วนหัว (Header) */
+.rpg-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 15px 15px 15px;
+    background: transparent;
+    border-bottom: 1px solid var(--holo-border);
+    cursor: grab; /* 🌟 เพิ่มรูปมือจับ เพื่อบอกว่าลากตรงนี้ได้ */
+}
+.rpg-modal-header:active {
+    cursor: grabbing; /* เปลี่ยนรูปมือตอนกำลังลาก */
+}
+
+.rpg-header-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ปุ่มไอคอนต่างๆ */
+.rpg-icon-btn, .rpg-preset-select {
+    background-color: var(--holo-card);
+    color: var(--holo-text);
+    border: 1px solid var(--holo-border);
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: 0.2s;
+}
+.rpg-icon-btn:hover { background-color: var(--holo-accent); color: white; }
+
+/* ระบบ Tabs */
+.rpg-tabs {
+    display: flex;
+    background: transparent;
+    padding: 5px 10px;
+    gap: 5px;
+    overflow-x: auto;
+}
+.rpg-tab-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 15px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: var(--holo-card);
+    color: var(--holo-text);
+    font-size: 0.85em;
+    font-weight: bold;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+.rpg-tab-btn.active {
+    background: var(--holo-accent);
+    color: white;
+    box-shadow: 0 0 10px var(--holo-accent);
+}
+
+/* พื้นที่เนื้อหา */
+.rpg-modal-content {
+    padding: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* =========================================
+   ดีไซน์การ์ดแต่ละประเภท (ลิ้นชัก)
+   ========================================= */
+.rpg-module-group {
+    background: var(--holo-card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.rpg-module-title {
+    font-size: 0.95em;
+    font-weight: bold;
+    color: var(--holo-accent);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* การ์ดสเตตัสตัวละคร (Profile) */
+.rpg-profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.rpg-profile-stat {
+    background: rgba(0,0,0,0.2);
+    padding: 8px;
+    border-radius: 8px;
+    border-left: 3px solid var(--holo-accent);
+}
+.rpg-light-mode .rpg-profile-stat { background: rgba(255,255,255,0.5); }
+.rpg-stat-label { font-size: 0.75em; opacity: 0.7; }
+.rpg-stat-value { font-weight: bold; font-size: 0.9em; }
+
+/* แชท (Chat Bubble) */
+.rpg-chat-container {
+    max-height: 250px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 5px;
+}
+.rpg-chat-bubble {
+    background: var(--holo-chat-bg);
+    padding: 10px;
+    border-radius: 15px;
+    border-top-left-radius: 2px;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+
+/* ปุ่มลอยด้านบน (เปิดหน้าต่าง) */
 #rpg-status-floating-btn {
     cursor: pointer;
     padding: 5px 10px;
@@ -7,324 +200,41 @@
     color: var(--SmartThemeBodyColor);
     border: 1px solid var(--SmartThemeBorderColor);
     font-weight: bold;
-    display: inline-flex;
     align-items: center;
     gap: 5px;
 }
 
-#rpg-status-floating-btn:hover {
-    background-color: var(--SmartThemeBotMesBlurTintColor);
-}
-
-/* ตัวหน้าต่างลอย (Modal) */
-#rpg-status-modal {
-    display: none; 
-    position: fixed;
-    /* เปลี่ยนจาก display: none เป็น flex เมื่อต้องการโชว์ */
-    /* display: flex; */ 
-    
-        /* --- สูตรตำแหน่งจากคลังฟอนต์ --- */
-    top: 50px;       /* กำหนดระยะห่างจากขอบบนให้แน่นอน (ปรับตัวเลขได้ตามชอบ) */
-    left: 0;
-    right: 0;
-    margin: 0 auto;  /* จัดกึ่งกลางแนวนอนอัตโนมัติ */
-    /* ---------------------------- */
-    
-    width: 90%;
-    max-width: 450px;
-    max-height: 85vh; 
-    margin: 0; 
-    overflow-y: auto; 
-    
-    background-color: rgba(25, 25, 25, 0.95);
-    backdrop-filter: blur(10px);
-    color: #ffffff;
-    
-    border: 2px solid var(--SmartThemeBorderColor, #444);
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    z-index: 9999;
-    
-    flex-direction: column;
-}
-
-/* ส่วนหัว (Header) - Dropdown & ปุ่ม Reset */
-.rpg-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background-color: var(--SmartThemeBlurTintColor);
-    border-bottom: 1px solid var(--SmartThemeBorderColor);
-    border-radius: 8px 8px 0 0;
-    gap: 10px; /* เพิ่มระยะห่างกันปุ่มเบียด */
-}
-
-.rpg-header-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap; /* ถ้าจอมือถือแคบมาก ให้ปุ่มปัดตกลงมาบรรทัดใหม่ได้ */
-}
-
 /* =========================================
-   Media Query สำหรับหน้าจอโทรศัพท์ (กว้างไม่เกิน 600px)
+   Media Query สำหรับมือถือและแท็บเล็ต (กว้างไม่เกิน 768px)
    ========================================= */
 @media screen and (max-width: 768px) {
-        #rpg-status-modal {
-        top: 5%; /* ให้ห่างจากขอบบนลงมา 5% เสมอ (ไม่ทะลุแน่นอน) */
-        max-height: 90vh; /* บังคับให้ความสูงไม่ล้นขอบล่าง */
-        width: 95%; /* ขยายให้เกือบเต็มจอ */
-        }
-    
-    /* ลด Padding ของหน้าต่างลง เพื่อเพิ่มพื้นที่เนื้อหา */
-    .rpg-modal-header {
-        padding: 10px;
+    #rpg-status-modal {
+        /* บังคับให้อยู่กึ่งกลางหน้าจอเสมอเมื่อเป็นมือถือ (ปิดระบบลากแบบเนียนๆ) */
+        top: 5vh !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+
+        width: 95vw; /* ขยายให้เกือบเต็มจอ */
+        max-width: 400px;
+        height: 85vh;
+        border-radius: 25px; /* ลดความโค้งลงนิดนึงให้เหมาะกับจอ */
     }
 
-    .rpg-modal-content {
-        padding: 10px;
-    }
+    .rpg-modal-header { padding: 20px 10px 10px 10px; }
+    .rpg-modal-content { padding: 10px; }
 
-    /* ลดขนาดตัวหนังสือและปุ่ม */
-    .rpg-preset-select, .rpg-reset-btn {
+    /* ย่อขนาดปุ่มและตัวหนังสือลง */
+    .rpg-icon-btn, .rpg-preset-select, .rpg-reset-btn {
+        padding: 5px 8px;
         font-size: 0.85em;
-        padding: 4px 8px;
     }
-
     .rpg-tab-btn {
-        padding: 8px 5px;
-        font-size: 0.9em;
-    }
-
-    /* ลดขนาด Module ให้อ่านง่ายบนจอมือถือ */
-    .rpg-module-title {
-        font-size: 1em;
-    }
-
-    .rpg-numeric-item {
-        padding: 6px 10px;
-        font-size: 0.9em;
-    }
-
-    .rpg-complex-card {
-        padding: 8px;
-    }
-
-    .rpg-complex-header {
-        font-size: 0.95em;
-    }
-
-    .rpg-complex-desc {
+        padding: 6px 8px;
         font-size: 0.85em;
     }
+
+    /* ปรับตาราง Profile ให้เป็นคอลัมน์เดียวถ้าจอแคบมาก */
+    .rpg-profile-grid {
+        grid-template-columns: 1fr;
+    }
 }
-
-.rpg-preset-select {
-    padding: 5px;
-    border-radius: 5px;
-    background: var(--bgLight);
-    color: var(--textLight);
-    border: 1px solid var(--SmartThemeBorderColor);
-}
-
-.rpg-reset-btn {
-    background-color: #d9534f;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-}
-
-.rpg-reset-btn:hover { background-color: #c9302c; }
-
-.rpg-close-btn {
-    cursor: pointer;
-    font-size: 1.5em;
-    line-height: 1;
-}
-
-/* ระบบ Tabs */
-.rpg-tabs {
-    display: flex;
-    background-color: var(--SmartThemeBotMesBlurTintColor);
-    border-bottom: 2px solid var(--SmartThemeBorderColor);
-}
-
-.rpg-tab-btn {
-    flex: 1;
-    padding: 10px;
-    text-align: center;
-    cursor: pointer;
-    border: none;
-    background: none;
-    color: var(--textLight);
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-.rpg-tab-btn:hover { background-color: rgba(255,255,255,0.1); }
-
-.rpg-tab-btn.active {
-    background-color: var(--bgLight);
-    border-bottom: 3px solid #5bc0de;
-}
-
-/* พื้นที่แสดงเนื้อหา (Modules จะมาอยู่ตรงนี้) */
-.rpg-modal-content {
-    padding: 15px;
-    overflow-y: auto;
-    flex-grow: 1;
-    min-height: 200px;
-}
-
-.rpg-tab-content {
-    display: none; /* ซ่อนเนื้อหา Tab อื่นไว้ */
-}
-
-.rpg-tab-content.active {
-    display: block; /* แสดงเฉพาะ Tab ที่เลือก */
-}
-
-/* --- ดีไซน์สำหรับ Module --- */
-.rpg-module-group {
-    margin-bottom: 20px;
-}
-
-.rpg-module-title {
-    font-size: 1.1em;
-    font-weight: bold;
-    border-bottom: 1px solid var(--SmartThemeBorderColor);
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-    color: #5bc0de;
-}
-
-/* Module: Numeric (ตัวเลข/หลอดพลัง) */
-.rpg-numeric-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-bottom: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.rpg-numeric-label {
-    font-weight: bold;
-}
-
-.rpg-numeric-value {
-    font-family: monospace;
-    font-size: 1.2em;
-    color: #f0ad4e;
-}
-
-/* Module: Complex (ไอเทม/ความสัมพันธ์) */
-.rpg-complex-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.rpg-complex-card {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-left: 4px solid #5cb85c;
-    padding: 10px;
-    border-radius: 4px;
-}
-
-.rpg-complex-header {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.rpg-complex-amount {
-    background-color: var(--SmartThemeBlurTintColor);
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.85em;
-}
-
-.rpg-complex-desc {
-    font-size: 0.9em;
-    color: #bbb;
-    line-height: 1.4;
-}
-
-.rpg-empty-text {
-    color: #777;
-    font-style: italic;
-    text-align: center;
-    padding: 10px;
-}
-
-/* ปุ่มไอคอนสำหรับ New และ Edit */
-.rpg-icon-btn {
-    background-color: var(--SmartThemeBlurTintColor);
-    color: var(--textLight);
-    border: 1px solid var(--SmartThemeBorderColor);
-    padding: 5px 8px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-}
-.rpg-icon-btn:hover { background-color: var(--SmartThemeBotMesBlurTintColor); }
-
-/* หน้าต่าง Editor (ซ่อนไว้เป็นค่าเริ่มต้น) */
-#rpg-editor-container {
-    display: none;
-    flex-direction: column;
-    flex-grow: 1;
-    padding: 15px;
-    background-color: rgba(0,0,0,0.5);
-}
-
-#rpg-preset-editor {
-    flex-grow: 1;
-    width: 100%;
-    min-height: 250px;
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-    border: 1px solid #444;
-    border-radius: 5px;
-    padding: 10px;
-    font-family: monospace;
-    font-size: 0.9em;
-    resize: vertical;
-    white-space: pre;
-}
-
-#rpg-save-preset-btn {
-    margin-top: 10px;
-    background-color: #5cb85c;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-#rpg-save-preset-btn:hover { background-color: #4cae4c; }
-
-/* =========================================
-   เอฟเฟกต์กระพริบแจ้งเตือนเมื่อสถานะอัปเดต
-   ========================================= */
-@keyframes statusUpdateGlow {
-    0% { box-shadow: 0 0 5px #5cb85c; background-color: #5cb85c; color: white; border-color: #5cb85c; }
-    50% { box-shadow: 0 0 20px #5cb85c; background-color: #5cb85c; color: white; border-color: #5cb85c; }
-    100% { box-shadow: 0 0 0px transparent; }
-}
-
-/* คลาสที่จะถูกใส่เข้าไปชั่วคราวตอนอัปเดต */
-.rpg-updated-glow {
-    animation: statusUpdateGlow 2s ease-out;
-}
-
