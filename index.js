@@ -812,23 +812,32 @@ function renderUI() {
     const presetLayout = settings.presets[currentPresetKey];
     const saveData = settings.saveData[currentPresetKey];
 
-    // 1. อัปเดต Dropdown
+    // 🌟 1. จดจำว่าตอนนี้กำลังเปิดแท็บไหนอยู่ (ก่อนที่จะล้างหน้าจอ)
+    let activeTabId = $('.rpg-tab-btn.active').data('target');
+
+    // อัปเดต Dropdown
     const dropdown = $('#rpg-preset-dropdown');
-    dropdown.empty(); // ล้างของเก่า
+    dropdown.empty();
     for (const key in settings.presets) {
         const isSelected = key === currentPresetKey ? "selected" : "";
         dropdown.append(`<option value="${key}" ${isSelected}>${settings.presets[key].name}</option>`);
     }
 
-    // 2. เตรียมพื้นที่วาด Tabs และ เนื้อหา
+    // เตรียมพื้นที่วาด Tabs และ เนื้อหา
     const tabsContainer = $('.rpg-tabs');
     const contentContainer = $('.rpg-modal-content');
     tabsContainer.empty();
     contentContainer.empty();
 
-    // 3. วนลูปสร้าง Tabs และ Modules ตาม JSON
+    // วนลูปสร้าง Tabs และ Modules ตาม JSON
     presetLayout.tabs.forEach((tab, index) => {
-        const isActive = index === 0 ? "active" : ""; // ให้ Tab แรกเปิดเป็นค่าเริ่มต้น
+        // 🌟 2. เช็คว่าแท็บนี้คือแท็บที่จำไว้ไหม (ถ้าเพิ่งเปิดครั้งแรก ให้แท็บ 0 ทำงาน)
+        let isActive = "";
+        if (activeTabId) {
+            isActive = (tab.id === activeTabId) ? "active" : "";
+        } else {
+            isActive = (index === 0) ? "active" : "";
+        }
 
         // สร้างปุ่ม Tab
         tabsContainer.append(`
