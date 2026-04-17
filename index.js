@@ -466,12 +466,35 @@ function setupUI() {
             $('#rpg-theme-btn i').removeClass('fa-moon').addClass('fa-sun');
         }
 
-                // 🌟 สั่งให้หน้าต่างสามารถลากไปมาได้ (Draggable)
-        // เพิ่มคำสั่ง cancel เพื่อยกเว้นไม่ให้ระบบลากไปบล็อกการกดปุ่มและ Dropdown
-        $('#rpg-status-modal').draggable({
-            handle: ".rpg-modal-header",
-            containment: "window",
-            cancel: "select, button, .rpg-icon-btn, .rpg-reset-btn" // 🌟 เพิ่มบรรทัดนี้ครับ
+        // 🌟 ระบบลากหน้าต่าง (Draggable)
+        const statusModal = $('#rpg-status-modal');
+
+        // เปิดระบบลากเฉพาะหน้าจอคอม (กว้างกว่า 768px)
+        if (window.innerWidth > 768) {
+            statusModal.draggable({
+                handle: ".rpg-modal-header",
+                containment: "window",
+                cancel: "select, button, .rpg-icon-btn, .rpg-reset-btn"
+            });
+        }
+
+        // คอยเช็คเวลามีการหมุนจอหรือย่อขยายหน้าต่าง
+        $(window).on('resize', function() {
+            if (window.innerWidth <= 768) {
+                // ถ้าจอมือถือ ให้ปิดระบบลาก (คืนการสัมผัสให้ Dropdown)
+                if (statusModal.hasClass('ui-draggable')) {
+                    statusModal.draggable('destroy');
+                }
+            } else {
+                // ถ้าจอคอม ให้เปิดระบบลาก
+                if (!statusModal.hasClass('ui-draggable')) {
+                    statusModal.draggable({
+                        handle: ".rpg-modal-header",
+                        containment: "window",
+                        cancel: "select, button, .rpg-icon-btn, .rpg-reset-btn"
+                    });
+                }
+            }
         });
 
         // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
