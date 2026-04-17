@@ -192,7 +192,18 @@ function generateStatusPrompt() {
                     tabData.push(`[Phone] ${module.name.split(' ')[0]}: Empty`);
                 }
             }
-            
+
+                        // 🌟 [ใหม่] ส่งข้อมูล Skill ให้ AI
+            else if (module.type === "skill") {
+                if (Array.isArray(val) && val.length > 0) {
+                    // ส่งไปแบบ: สกิล: ลูกไฟ(Lv.1) [สถานะ: พร้อมใช้งาน]
+                    const skillsText = val.map(s => `${s.name}(Lv.${s.level || 1}) [สถานะ: ${s.status}]`).join(', ');
+                    tabData.push(`${module.name.split(' ')[0]}: ${skillsText}`);
+                } else {
+                    tabData.push(`${module.name.split(' ')[0]}: Empty`);
+                }
+            }
+
         });
 
         if (tabData.length > 0) {
@@ -589,6 +600,36 @@ async function handleIncomingMessage() {
                 }
             }
 
+            // 🌟 [ใหม่] กรณีเป็น Module แบบ Skill (ทักษะ/เวทมนตร์)
+            // ฟอร์แมต: skills: ลูกไฟ = พร้อมใช้งาน (สร้างลูกไฟโจมตีศัตรู)
+            else if (moduleDef.type === "skill") {
+                // Regex นี้จะดักจับ (ชื่อสกิล) = (สถานะ) (คำอธิบายในวงเล็บ-ถ้ามี)
+                const skillMatch = valueStr.match(/^(.*?)\s*=\s*(.*?)(?:\s*\((.*?)\))?$/);
+
+                if (skillMatch) {
+                    const skillName = skillMatch[1].trim();
+                    const newStatus = skillMatch[2].trim();
+                    const newDesc = skillMatch[3] ? skillMatch[3].trim() : null;
+
+                    if (!Array.isArray(saveData[key])) saveData[key] = [];
+
+                    let existingSkill = saveData[key].find(s => s.name === skillName);
+
+                    if (existingSkill) {
+                        existingSkill.status = newStatus; // อัปเดตสถานะเสมอ
+                        if (newDesc) existingSkill.desc = newDesc; // อัปเดตคำอธิบายเฉพาะถ้า AI พิมพ์วงเล็บมา
+                    } else {
+                        // ถ้าเป็นสกิลใหม่ที่เพิ่งได้รับ!
+                        saveData[key].push({
+                            name: skillName,
+                            level: 1,
+                            desc: newDesc || "ไม่มีคำอธิบาย",
+                            status: newStatus
+                        });
+                    }
+                }
+            }
+
         });
 
         // 4. ลบแท็ก <update> ออกจากหน้าแชท
@@ -737,6 +778,31 @@ function renderUI() {
                     });
                 } else {
                     tabContentHtml += `<div class="rpg-empty-text">- ไม่มีข้อความใหม่ -</div>`;
+                }
+                tabContentHtml += `</div>`;
+            }
+
+                        // 🌟 [ใหม่] วาดหน้าจอ Skill
+            else if (module.type === "skill") {
+                tabContentHtml += `<div class="rpg-complex-list">`;
+                if (Array.isArray(currentValue) && currentValue.length > 0) {
+                    currentValue.forEach(skill => {
+                        // เปลี่ยนสีป้ายสถานะ (ถ้ามีคำว่า พร้อม/Ready ให้เป็นสีเขียว นอกนั้นสีส้ม/แดง)
+                        const isReady = skill.status === "พร้อมใช้งาน" || skill.status === "Ready";
+                        const statusBg = isReady ? "#5cb85c" : "#f0ad4e";
+
+                        tabContentHtml += `
+                            <div class="rpg-complex-card" style="border-left-color: #f0ad4e;">
+                                <div class="rpg-complex-header">
+                                    <span>${skill.name} <span style="font-size:0.8em; opacity:0.5;">(Lv.${skill.level || 1})</span></span>
+                                    <span class="rpg-complex-amount" style="background: ${statusBg}; box-shadow: 0 0 5px ${statusBg};">${skill.status}</span>
+                                </div>
+                                <div class="rpg-complex-desc">${skill.desc}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    tabContentHtml += `<div class="rpg-empty-text">- ไม่มีทักษะ -</div>`;
                 }
                 tabContentHtml += `</div>`;
             }
