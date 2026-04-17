@@ -313,3 +313,18 @@
 }
 
 #rpg-save-preset-btn:hover { background-color: #4cae4c; }
+
+/* =========================================
+   เอฟเฟกต์กระพริบแจ้งเตือนเมื่อสถานะอัปเดต
+   ========================================= */
+@keyframes statusUpdateGlow {
+    0% { box-shadow: 0 0 5px #5cb85c; background-color: #5cb85c; color: white; border-color: #5cb85c; }
+    50% { box-shadow: 0 0 20px #5cb85c; background-color: #5cb85c; color: white; border-color: #5cb85c; }
+    100% { box-shadow: 0 0 0px transparent; }
+}
+
+/* คลาสที่จะถูกใส่เข้าไปชั่วคราวตอนอัปเดต */
+.rpg-updated-glow {
+    animation: statusUpdateGlow 2s ease-out;
+}
+
