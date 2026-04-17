@@ -231,6 +231,94 @@
 }
 
 /* =========================================
+   ดีไซน์ Module: Numeric (ตัวเลข/หลอดพลัง)
+   ========================================= */
+.rpg-numeric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--holo-accent); /* เส้นขอบซ้ายสีนีออน */
+}
+
+.rpg-light-mode .rpg-numeric-item {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.rpg-numeric-label {
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.rpg-numeric-value {
+    font-family: monospace;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--holo-accent);
+}
+
+/* =========================================
+   ดีไซน์ Module: Complex (ไอเทม/สกิล)
+   ========================================= */
+.rpg-complex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rpg-complex-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.rpg-light-mode .rpg-complex-card {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* เพิ่มเส้นตกแต่งขอบซ้ายของการ์ดไอเทม */
+.rpg-complex-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #5cb85c; /* สีเขียวบอกถึงไอเทม */
+}
+
+.rpg-complex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 0.95em;
+}
+
+.rpg-complex-amount {
+    background: var(--holo-accent);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    box-shadow: 0 0 5px var(--holo-accent);
+}
+
+.rpg-complex-desc {
+    font-size: 0.85em;
+    opacity: 0.7; /* ทำให้สีอ่อนลงนิดนึงให้อ่านง่าย */
+    line-height: 1.4;
+}
+
+/* =========================================
    Media Query สำหรับมือถือและแท็บเล็ต (กว้างไม่เกิน 768px)
    ========================================= */
 @media screen and (max-width: 768px) {
