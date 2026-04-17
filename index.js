@@ -498,10 +498,20 @@ async function handleIncomingMessage() {
         // 5. อัปเดตหน้าต่าง UI สถานะของเรา!
         renderUI();
         console.log(`[${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว!`);
-        triggerSlash(`/pass [${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว! | /echo severity=success`);
 
-        // 6. บังคับรีเฟรชหน้าแชท 1 ครั้ง เพื่อให้ข้อความ <update> หายไปจากหน้าจอจริงๆ
-        // (หน่วงเวลาเล็กน้อยเพื่อให้ระบบเซฟแชทเสร็จก่อน)
+        // 🌟 6. แสดงการแจ้งเตือนให้ผู้เล่นรู้! 🌟
+        // 6.1 ทำให้ปุ่ม Status กระพริบแสงสีเขียว 2 วินาที
+        const statusBtn = $('#rpg-status-floating-btn');
+        statusBtn.removeClass('rpg-updated-glow'); // ล้างของเก่าก่อนเผื่อมันกระพริบอยู่
+        void statusBtn[0].offsetWidth; // ทริคบังคับให้ CSS รีเฟรช
+        statusBtn.addClass('rpg-updated-glow');
+
+        // 6.2 เด้งป๊อปอัปแจ้งเตือนมุมขวาบน (ใช้ระบบ Toast ของ SillyTavern)
+        if (typeof toastr !== 'undefined') {
+            toastr.info("ตรวจสอบและอัปเดตสถานะตัวละครเรียบร้อยแล้ว", "RPG Status");
+        }
+
+        // 7. บังคับรีเฟรชหน้าแชท 1 ครั้ง เพื่อให้ข้อความ <update> หายไป
         setTimeout(() => {
             reloadCurrentChat();
         }, 100);
