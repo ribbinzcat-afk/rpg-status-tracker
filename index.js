@@ -14,6 +14,7 @@ const extensionName = "rpg-status-tracker";
 const defaultSettings = {
     currentPreset: "fantasy", // Preset ที่กำลังใช้งานอยู่
     showFloatingButton: true,
+    showFabButton: true,
     theme: "dark",
 
     // 1. ส่วนโครงสร้าง UI (Layout)
@@ -257,6 +258,24 @@ function setupUI() {
         topMenu.appendChild(floatingBtn);
 
         // ==========================================
+        // 🌟 ส่วนที่ 1.5: สร้างปุ่มกลมมุมจอ (FAB)
+        // ==========================================
+        if (document.getElementById('rpg-fab-btn')) {
+            document.getElementById('rpg-fab-btn').remove();
+        }
+
+        const fabBtn = document.createElement('div');
+        fabBtn.id = 'rpg-fab-btn';
+        fabBtn.title = 'เปิดหน้าต่างสถานะ';
+        fabBtn.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>'; // ใช้ไอคอนนักบินอวกาศ หรือเปลี่ยนเป็น fa-address-card ก็ได้ครับ
+        fabBtn.style.display = settings.showFabButton ? 'flex' : 'none';
+
+        fabBtn.addEventListener('click', () => {
+            $('#rpg-status-modal').fadeToggle(200);
+        });
+        document.body.appendChild(fabBtn);
+
+        // ==========================================
         // ส่วนที่ 2: สร้าง UI ในแผงควบคุม (Extensions Panel)
         // ==========================================
         const extensionPanel = document.getElementById('extensions_settings');
@@ -285,14 +304,26 @@ function setupUI() {
                 <input type="checkbox" id="rpg-toggle-floating-btn" ${settings.showFloatingButton ? 'checked' : ''}>
                 <span>แสดงปุ่ม Status ที่เมนูด้านบน</span>
             </label>
+            <br>
+            <label class="checkbox_label" style="margin-top: 5px;">
+                <input type="checkbox" id="rpg-toggle-fab-btn" ${settings.showFabButton ? 'checked' : ''}>
+                <span>แสดงปุ่มกลม (FAB) ที่มุมขวาล่าง</span>
+            </label>
         `;
         panelContainer.appendChild(toggleContainer);
-        extensionPanel.appendChild(panelContainer);
 
+        // คำสั่งของปุ่มเมนูบน (ของเดิม)
         document.getElementById('rpg-toggle-floating-btn').addEventListener('change', (e) => {
             const isChecked = e.target.checked;
             settings.showFloatingButton = isChecked;
             floatingBtn.style.display = isChecked ? 'inline-flex' : 'none';
+        });
+
+        // 🌟 คำสั่งของปุ่มกลมมุมจอ (ของใหม่)
+        document.getElementById('rpg-toggle-fab-btn').addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            settings.showFabButton = isChecked;
+            fabBtn.style.display = isChecked ? 'flex' : 'none';
         });
 
         // ==========================================
