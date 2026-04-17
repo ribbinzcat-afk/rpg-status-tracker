@@ -325,6 +325,44 @@
 }
 
 /* =========================================
+   ปุ่มลอยกลมมุมจอ (Floating Action Button - FAB)
+   ========================================= */
+#rpg-fab-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, var(--holo-accent), #0056b3);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 10px var(--holo-accent);
+    z-index: 9998; /* ให้อยู่ใต้หน้าต่าง Status นิดนึง */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#rpg-fab-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 15px var(--holo-accent);
+}
+
+/* ทำให้ปุ่มขยับหลบขึ้นมานิดนึงบนมือถือ เผื่อไปทับปุ่มส่งข้อความ */
+@media screen and (max-width: 768px) {
+    #rpg-fab-btn {
+        bottom: 80px; /* ขยับลอยขึ้นมาให้พ้นคีย์บอร์ด/ช่องพิมพ์ */
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.3em;
+    }
+}
+
+/* =========================================
    Media Query สำหรับมือถือและแท็บเล็ต (กว้างไม่เกิน 768px)
    ========================================= */
 @media screen and (max-width: 768px) {
