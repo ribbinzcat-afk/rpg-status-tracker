@@ -359,28 +359,6 @@ function setupUI() {
             renderUI();
         });
 
-                // 🌟 ปุ่มสลับธีม (Light/Dark Mode)
-        $('#rpg-theme-btn').on('click', () => {
-            const modal = $('#rpg-status-modal');
-            const icon = $('#rpg-theme-btn i');
-
-            if (settings.theme === "dark") {
-                settings.theme = "light";
-                modal.addClass('rpg-light-mode');
-                icon.removeClass('fa-moon').addClass('fa-sun');
-            } else {
-                settings.theme = "dark";
-                modal.removeClass('rpg-light-mode');
-                icon.removeClass('fa-sun').addClass('fa-moon');
-            }
-        });
-
-        // เซ็ตธีมเริ่มต้นตอนเปิดหน้าต่างครั้งแรก
-        if (settings.theme === "light") {
-            $('#rpg-status-modal').addClass('rpg-light-mode');
-            $('#rpg-theme-btn i').removeClass('fa-moon').addClass('fa-sun');
-        }
-
         // 🌟 ปุ่ม "✏️" เปิดหน้าต่างแก้ไข JSON
         $('#rpg-edit-preset-btn').on('click', () => {
             const currentKey = settings.currentPreset;
@@ -445,6 +423,32 @@ function setupUI() {
                 alert("เกิดข้อผิดพลาด! รูปแบบ JSON ไม่ถูกต้อง\n\nรายละเอียด: " + error.message);
             }
         });
+
+                // 🌟 ปุ่มสลับธีม (Light/Dark Mode)
+        $('#rpg-theme-btn').on('click', () => {
+            const modal = $('#rpg-status-modal');
+            const icon = $('#rpg-theme-btn i');
+
+            if (settings.theme === "dark") {
+                settings.theme = "light";
+                modal.addClass('rpg-light-mode');
+                icon.removeClass('fa-moon').addClass('fa-sun');
+            } else {
+                settings.theme = "dark";
+                modal.removeClass('rpg-light-mode');
+                icon.removeClass('fa-sun').addClass('fa-moon');
+            }
+        });
+
+        // เซ็ตธีมเริ่มต้นตอนเปิดหน้าต่างครั้งแรก
+        if (settings.theme === "light") {
+            $('#rpg-status-modal').addClass('rpg-light-mode');
+            $('#rpg-theme-btn i').removeClass('fa-moon').addClass('fa-sun');
+        }
+
+                // 🌟 สั่งให้หน้าต่างสามารถลากไปมาได้ (Draggable)
+        // โดยกำหนดให้จับลากได้เฉพาะตรงส่วนหัว (.rpg-modal-header)
+        $('#rpg-status-modal').draggable({ handle: ".rpg-modal-header", containment: "window" });
 
         // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
         renderUI();
