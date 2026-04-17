@@ -169,6 +169,29 @@ function generateStatusPrompt() {
                     tabData.push(`${module.name.split(' ')[0]}: Empty`);
                 }
             }
+
+            // 🌟 [ใหม่] แปลง Profile เป็นข้อความสั้นๆ
+            else if (module.type === "profile") {
+                if (typeof val === 'object' && val !== null) {
+                    // แปลง { hp: "100", status: "ดี" } เป็น "hp: 100, status: ดี"
+                    const stats = Object.entries(val).map(([k, v]) => `${k}: ${v}`).join(', ');
+                    tabData.push(`${module.name.split(' ')[0]}: [${stats}]`);
+                } else {
+                    tabData.push(`${module.name.split(' ')[0]}: No Data`);
+                }
+            }
+
+            // 🌟 [ใหม่] จัดการ Chat (ส่งไปแค่ 3 ข้อความล่าสุด ประหยัด Token!)
+            else if (module.type === "chat") {
+                if (Array.isArray(val) && val.length > 0) {
+                    // ดึงมาแค่ 3 ข้อความสุดท้าย (slice(-3))
+                    const recentChats = val.slice(-3).map(c => `${c.sender}: "${c.message}"`).join(' | ');
+                    tabData.push(`[Phone] ${module.name.split(' ')[0]}: ${recentChats}`);
+                } else {
+                    tabData.push(`[Phone] ${module.name.split(' ')[0]}: Empty`);
+                }
+            }
+            
         });
 
         if (tabData.length > 0) {
@@ -652,6 +675,41 @@ function renderUI() {
                     });
                 } else {
                     tabContentHtml += `<div class="rpg-empty-text">- ว่างเปล่า -</div>`;
+                }
+                tabContentHtml += `</div>`;
+            }
+
+            // 🌟 [ใหม่] วาดหน้าจอ Profile
+            else if (module.type === "profile") {
+                tabContentHtml += `<div style="background: rgba(0,0,0,0.2); border-left: 4px solid #f0ad4e; padding: 10px; border-radius: 4px;">`;
+                if (typeof currentValue === 'object' && currentValue !== null && Object.keys(currentValue).length > 0) {
+                    // สร้างตาราง 2 คอลัมน์แบบง่ายๆ
+                    tabContentHtml += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">`;
+                    for (const [statKey, statValue] of Object.entries(currentValue)) {
+                        tabContentHtml += `<div><span style="color:#aaa; font-size:0.85em;">${statKey}:</span> <br><b>${statValue}</b></div>`;
+                    }
+                    tabContentHtml += `</div>`;
+                } else {
+                    tabContentHtml += `<div class="rpg-empty-text">- ไม่มีข้อมูลสเตตัส -</div>`;
+                }
+                tabContentHtml += `</div>`;
+            }
+
+            // 🌟 [ใหม่] วาดหน้าจอ Chat
+            else if (module.type === "chat") {
+                // ทำกล่องให้ Scroll ได้
+                tabContentHtml += `<div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">`;
+                if (Array.isArray(currentValue) && currentValue.length > 0) {
+                    currentValue.forEach(msg => {
+                        tabContentHtml += `
+                            <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; border-top-left-radius: 0;">
+                                <div style="font-size: 0.8em; color: #5bc0de; font-weight: bold; margin-bottom: 2px;">${msg.sender}</div>
+                                <div style="font-size: 0.9em;">${msg.message}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    tabContentHtml += `<div class="rpg-empty-text">- ไม่มีข้อความใหม่ -</div>`;
                 }
                 tabContentHtml += `</div>`;
             }
