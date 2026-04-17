@@ -258,7 +258,7 @@ function setupUI() {
         topMenu.appendChild(floatingBtn);
 
         // ==========================================
-        // 🌟 ส่วนที่ 1.5: สร้างปุ่มกลมมุมจอ (FAB)
+        // 🌟 ส่วนที่ 1.5: สร้างปุ่มกลมมุมจอ (FAB) แบบลากได้!
         // ==========================================
         if (document.getElementById('rpg-fab-btn')) {
             document.getElementById('rpg-fab-btn').remove();
@@ -266,15 +266,37 @@ function setupUI() {
 
         const fabBtn = document.createElement('div');
         fabBtn.id = 'rpg-fab-btn';
-        fabBtn.title = 'เปิดหน้าต่างสถานะ';
-        fabBtn.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>'; // ใช้ไอคอนนักบินอวกาศ หรือเปลี่ยนเป็น fa-address-card ก็ได้ครับ
+        fabBtn.title = 'เปิดหน้าต่างสถานะ (สามารถลากเพื่อย้ายตำแหน่งได้)';
+        fabBtn.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>';
         fabBtn.style.display = settings.showFabButton ? 'flex' : 'none';
-
-        fabBtn.addEventListener('click', () => {
-            $('#rpg-status-modal').fadeToggle(200);
-        });
         document.body.appendChild(fabBtn);
 
+        // ตัวแปรสำหรับเช็คว่ากำลัง "ลาก" หรือ "คลิก"
+        let isDraggingFab = false;
+
+        // สั่งให้น้องปุ่มลากได้ (Draggable)
+        $('#rpg-fab-btn').draggable({
+            containment: "window", // ลากไม่ให้หลุดขอบจอ
+            start: function() {
+                isDraggingFab = true; // เริ่มลาก
+            },
+            stop: function() {
+                // เมื่อปล่อยนิ้ว ให้หน่วงเวลา 0.1 วินาทีก่อนคืนค่า
+                // เพื่อป้องกันไม่ให้ระบบคิดว่าเราตั้งใจ "คลิก" เปิดหน้าต่าง
+                setTimeout(() => { isDraggingFab = false; }, 100);
+            }
+        });
+
+        // คำสั่งเมื่อกดปุ่ม
+        fabBtn.addEventListener('click', (e) => {
+            if (isDraggingFab) {
+                e.preventDefault(); // ถ้ากำลังลากอยู่ ให้ยกเลิกการคลิก
+                return;
+            }
+            // ถ้าแค่คลิกเบาๆ ก็เปิดหน้าต่างปกติ
+            $('#rpg-status-modal').fadeToggle(200);
+        });
+        
         // ==========================================
         // ส่วนที่ 2: สร้าง UI ในแผงควบคุม (Extensions Panel)
         // ==========================================
