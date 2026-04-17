@@ -214,6 +214,27 @@ function generateStatusPrompt() {
                 }
             }
 
+                        // 🌟 [ใหม่] ส่งข้อมูล Social Media ให้ AI (ส่งแค่ 1 โพสต์ล่าสุด)
+            else if (module.type === "social") {
+                if (Array.isArray(val) && val.length > 0) {
+                    // ดึงโพสต์ล่าสุด (ตัวสุดท้ายใน Array)
+                    const latestPost = val[val.length - 1];
+
+                    let postText = `[โพสต์ล่าสุดโดย ${latestPost.author}]: "${latestPost.message}"`;
+                    if (latestPost.attachment) postText += ` (รูปภาพ/บริบท: ${latestPost.attachment})`;
+
+                    // ถ้ามีคอมเมนต์ ให้ต่อท้ายไปด้วย
+                    if (latestPost.comments && latestPost.comments.length > 0) {
+                        const commentsText = latestPost.comments.map(c => `${c.author}: ${c.message}`).join(', ');
+                        postText += ` | คอมเมนต์: ${commentsText}`;
+                    }
+
+                    tabData.push(`${module.name.split(' ')[0]}: ${postText}`);
+                } else {
+                    tabData.push(`${module.name.split(' ')[0]}: Empty Timeline`);
+                }
+            }
+
         });
 
         if (tabData.length > 0) {
@@ -760,6 +781,46 @@ async function handleIncomingMessage() {
                             level: 1 + (levelChange > 0 ? levelChange - 1 : 0),
                             desc: newDesc || "ไม่มีคำอธิบาย",
                             status: newStatus || "พร้อมใช้งาน"
+                        });
+                    }
+                }
+            }
+
+            // 🌟 [ใหม่] กรณีเป็น Module แบบ Social Media (โพสต์และคอมเมนต์)
+            // ฟอร์แมตสร้างโพสต์: my_social: อลิซ = วันนี้อากาศดีจัง! (รูปภาพท้องฟ้า)
+            // ฟอร์แมตคอมเมนต์: my_social: บ็อบ = [อลิซ] ซื้อขนมมาฝากด้วย!
+            else if (moduleDef.type === "social") {
+                if (!Array.isArray(saveData[key])) saveData[key] = [];
+
+                // เช็คว่ามีวงเล็บก้ามปู [...] ไหม (ถ้ามี = เป็นคอมเมนต์)
+                const commentMatch = valueStr.match(/^(.*?)\s*=\s*\[(.*?)\]\s*(.*)$/);
+
+                if (commentMatch) {
+                    // --- กรณีเป็น "คอมเมนต์" ---
+                    const commenter = commentMatch[1].trim();
+                    const targetAuthor = commentMatch[2].trim();
+                    const commentMsg = commentMatch[3].trim();
+
+                    // หาโพสต์ "ล่าสุด" ของเป้าหมาย
+                    // (ใช้ reverse() เพื่อหาจากล่างขึ้นบน จะได้โพสต์ใหม่สุดเสมอ)
+                    const targetPost = [...saveData[key]].reverse().find(post => post.author === targetAuthor);
+
+                    if (targetPost) {
+                        if (!targetPost.comments) targetPost.comments = [];
+                        targetPost.comments.push({ author: commenter, message: commentMsg });
+                    }
+                } else {
+                    // --- กรณีเป็น "โพสต์ใหม่" ---
+                    // จับชื่อ = ข้อความ (คำบรรยายรูป)
+                    const postMatch = valueStr.match(/^(.*?)\s*=\s*(.*?)(?:\s*\((.*?)\))?$/);
+                    if (postMatch) {
+                        saveData[key].push({
+                            id: "post_" + Date.now(),
+                            author: postMatch[1].trim(),
+                            message: postMatch[2].trim(),
+                            attachment: postMatch[3] ? postMatch[3].trim() : "", // กล่องคำบรรยาย/รูปภาพ
+                            likes: Math.floor(Math.random() * 50) + 1, // สุ่มยอดไลก์เริ่มต้นให้ดูเนียนๆ
+                            comments: []
                         });
                     }
                 }
