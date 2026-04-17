@@ -297,6 +297,7 @@ function setupUI() {
         });
         panelContainer.appendChild(panelOpenBtn);
 
+        // 🌟 สร้างสวิตช์ 2 ตัว
         const toggleContainer = document.createElement('div');
         toggleContainer.style.marginTop = '10px';
         toggleContainer.innerHTML = `
@@ -311,20 +312,21 @@ function setupUI() {
             </label>
         `;
         panelContainer.appendChild(toggleContainer);
+
+        // 🌟 สำคัญมาก: ต้องเอาไปแปะบนจอก่อน ค่อยผูกคำสั่ง
         extensionPanel.appendChild(panelContainer);
 
-        // คำสั่งของปุ่มเมนูบน (ของเดิม)
-        document.getElementById('rpg-toggle-floating-btn').addEventListener('change', (e) => {
-            const isChecked = e.target.checked;
+        // 🌟 ใช้ jQuery ผูกคำสั่ง (ปลอดภัย 100%)
+        $('#rpg-toggle-floating-btn').on('change', function() {
+            const isChecked = $(this).is(':checked');
             settings.showFloatingButton = isChecked;
-            floatingBtn.style.display = isChecked ? 'inline-flex' : 'none';
+            $('#rpg-status-floating-btn').css('display', isChecked ? 'inline-flex' : 'none');
         });
 
-        // 🌟 คำสั่งของปุ่มกลมมุมจอ (ของใหม่)
-        document.getElementById('rpg-toggle-fab-btn').addEventListener('change', (e) => {
-            const isChecked = e.target.checked;
+        $('#rpg-toggle-fab-btn').on('change', function() {
+            const isChecked = $(this).is(':checked');
             settings.showFabButton = isChecked;
-            fabBtn.style.display = isChecked ? 'flex' : 'none';
+            $('#rpg-fab-btn').css('display', isChecked ? 'flex' : 'none');
         });
 
         // ==========================================
