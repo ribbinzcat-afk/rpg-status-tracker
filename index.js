@@ -500,6 +500,44 @@ async function handleIncomingMessage() {
                     saveData[key] = saveData[key].filter(i => i.amount > 0);
                 }
             }
+
+                        // 🌟 [ใหม่] กรณีเป็น Module แบบ Profile (สเตตัสตัวละคร) 🌟
+            // ฟอร์แมตที่ AI ต้องพิมพ์: char_alice: hp = 80/100 หรือ char_alice: สถานะ = บาดเจ็บ
+            else if (moduleDef.type === "profile") {
+                // แยกคีย์ย่อยและค่าออกจากกันด้วยเครื่องหมาย =
+                const profileMatch = valueStr.match(/^(.*?)\s*=\s*(.*)$/);
+                if (profileMatch) {
+                    const statKey = profileMatch[1].trim();
+                    const statValue = profileMatch[2].trim();
+
+                    // ถ้ายังไม่มีข้อมูล Object ของตัวละครนี้ ให้สร้างใหม่
+                    if (typeof saveData[key] !== 'object' || Array.isArray(saveData[key])) {
+                        saveData[key] = {};
+                    }
+
+                    // บันทึกค่าลงไป
+                    saveData[key][statKey] = statValue;
+                }
+            }
+
+            // 🌟 [ใหม่] กรณีเป็น Module แบบ Chat (ข้อความโทรศัพท์) 🌟
+            // ฟอร์แมตที่ AI ต้องพิมพ์: party_chat: อลิซ = นายอยู่ไหน รีบมาช่วยที!
+            else if (moduleDef.type === "chat") {
+                const chatMatch = valueStr.match(/^(.*?)\s*=\s*(.*)$/);
+                if (chatMatch) {
+                    const sender = chatMatch[1].trim();
+                    const message = chatMatch[2].trim();
+
+                    // ถ้ายังไม่มี Array ให้สร้างใหม่
+                    if (!Array.isArray(saveData[key])) {
+                        saveData[key] = [];
+                    }
+
+                    // ดันข้อความใหม่เข้าไปในแชท
+                    saveData[key].push({ sender: sender, message: message });
+                }
+            }
+
         });
 
         // 4. ลบแท็ก <update> ออกจากหน้าแชท
