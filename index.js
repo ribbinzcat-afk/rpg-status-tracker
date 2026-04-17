@@ -600,31 +600,33 @@ async function handleIncomingMessage() {
                 }
             }
 
-            // 🌟 [ใหม่] กรณีเป็น Module แบบ Skill (ทักษะ/เวทมนตร์)
-            // ฟอร์แมต: skills: ลูกไฟ = พร้อมใช้งาน (สร้างลูกไฟโจมตีศัตรู)
+            // 🌟 [ใหม่] กรณีเป็น Module แบบ Skill (รองรับการอัปเลเวล!)
             else if (moduleDef.type === "skill") {
-                // Regex นี้จะดักจับ (ชื่อสกิล) = (สถานะ) (คำอธิบายในวงเล็บ-ถ้ามี)
-                const skillMatch = valueStr.match(/^(.*?)\s*=\s*(.*?)(?:\s*\((.*?)\))?$/);
+                // Regex ใหม่: จับชื่อสกิล (+/-เลเวล) = สถานะ (คำอธิบาย)
+                const skillMatch = valueStr.match(/^(.*?)(?:\s*([+-]\d+))?(?:\s*=\s*(.*?))?(?:\s*\((.*?)\))?$/);
 
                 if (skillMatch) {
                     const skillName = skillMatch[1].trim();
-                    const newStatus = skillMatch[2].trim();
-                    const newDesc = skillMatch[3] ? skillMatch[3].trim() : null;
+                    const levelChange = skillMatch[2] ? parseInt(skillMatch[2]) : 0; // ดึงตัวเลข +1
+                    const newStatus = skillMatch[3] ? skillMatch[3].trim() : null;   // ดึงสถานะหลังเครื่องหมาย =
+                    const newDesc = skillMatch[4] ? skillMatch[4].trim() : null;     // ดึงคำอธิบายในวงเล็บ
 
                     if (!Array.isArray(saveData[key])) saveData[key] = [];
 
                     let existingSkill = saveData[key].find(s => s.name === skillName);
 
                     if (existingSkill) {
-                        existingSkill.status = newStatus; // อัปเดตสถานะเสมอ
-                        if (newDesc) existingSkill.desc = newDesc; // อัปเดตคำอธิบายเฉพาะถ้า AI พิมพ์วงเล็บมา
+                        // ถ้ามีสกิลนี้อยู่แล้ว
+                        existingSkill.level = (existingSkill.level || 1) + levelChange; // บวกเลเวล
+                        if (newStatus) existingSkill.status = newStatus; // เปลี่ยนสถานะ (ถ้ามีสั่ง)
+                        if (newDesc) existingSkill.desc = newDesc; // เปลี่ยนคำอธิบาย (ถ้ามีสั่ง)
                     } else {
-                        // ถ้าเป็นสกิลใหม่ที่เพิ่งได้รับ!
+                        // ถ้าเป็นสกิลใหม่เอี่ยม
                         saveData[key].push({
                             name: skillName,
-                            level: 1,
+                            level: 1 + (levelChange > 0 ? levelChange - 1 : 0),
                             desc: newDesc || "ไม่มีคำอธิบาย",
-                            status: newStatus
+                            status: newStatus || "พร้อมใช้งาน"
                         });
                     }
                 }
