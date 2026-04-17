@@ -467,8 +467,12 @@ function setupUI() {
         }
 
                 // 🌟 สั่งให้หน้าต่างสามารถลากไปมาได้ (Draggable)
-        // โดยกำหนดให้จับลากได้เฉพาะตรงส่วนหัว (.rpg-modal-header)
-        $('#rpg-status-modal').draggable({ handle: ".rpg-modal-header", containment: "window" });
+        // เพิ่มคำสั่ง cancel เพื่อยกเว้นไม่ให้ระบบลากไปบล็อกการกดปุ่มและ Dropdown
+        $('#rpg-status-modal').draggable({
+            handle: ".rpg-modal-header",
+            containment: "window",
+            cancel: "select, button, .rpg-icon-btn, .rpg-reset-btn" // 🌟 เพิ่มบรรทัดนี้ครับ
+        });
 
         // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
         renderUI();
