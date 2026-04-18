@@ -467,22 +467,52 @@ function setupUI() {
             $('#rpg-editor-container').css('display', 'flex');
         });
 
-        // 🌟 ปุ่ม "💾" บันทึก JSON ที่แก้ไข
+        // 🌟 ปุ่ม "💾" บันทึก JSON ที่แก้ไข (Smart Merge System)
         $('#rpg-save-preset-btn').on('click', () => {
             try {
                 const currentKey = settings.currentPreset;
                 const editorValue = $('#rpg-preset-editor').val();
                 const newTabsData = JSON.parse(editorValue);
 
+                // 1. อัปเดตโครงสร้างหน้าต่าง
                 settings.presets[currentKey].tabs = newTabsData;
 
+                // 2. ผสานข้อมูล (Smart Merge)
                 newTabsData.forEach(tab => {
                     tab.modules.forEach(mod => {
-                        if (settings.saveData[currentKey][mod.id] === undefined) {
-                            settings.saveData[currentKey][mod.id] = Array.isArray(mod.default) ? [] : mod.default;
+                        const existingData = settings.saveData[currentKey][mod.id];
+
+                        if (existingData === undefined) {
+                            // กรณีที่ 1: โมดูลใหม่เอี่ยม (เพิ่งสร้าง) -> ดึงค่า default มาใส่เลย
+                            settings.saveData[currentKey][mod.id] = Array.isArray(mod.default) ? JSON.parse(JSON.stringify(mod.default)) : mod.default;
+                        }
+                        else if (Array.isArray(mod.default) && Array.isArray(existingData)) {
+                            // กรณีที่ 2: โมดูลแบบ Array (เช่น ไอเทม, สกิล)
+                            // เช็คว่าใน JSON มีการเพิ่มไอเทม/สกิลใหม่ ที่เซฟปัจจุบันยังไม่มีหรือเปล่า
+                            mod.default.forEach(defItem => {
+                                // เช็คจากชื่อไอเทม/สกิล
+                                const found = existingData.find(item => item.name === defItem.name);
+                                if (!found) {
+                                    // ถ้าเซฟปัจจุบันยังไม่มีไอเทมนี้ ให้ยัดเพิ่มเข้าไปเลย! (ข้อมูลเก่าไม่หาย)
+                                    existingData.push(JSON.parse(JSON.stringify(defItem)));
+                                }
+                            });
                         }
                     });
                 });
+
+                // 3. ปิดหน้าต่าง Editor และวาดหน้าจอใหม่
+                $('#rpg-editor-container').hide();
+                $('.rpg-tabs, .rpg-modal-content').show();
+                renderUI();
+
+                // แจ้งเตือนเบาๆ ว่าผสานข้อมูลสำเร็จ
+                if (typeof toastr !== 'undefined') toastr.success("บันทึกและผสานข้อมูลสำเร็จ!", "RPG Status");
+
+            } catch (error) {
+                alert("เกิดข้อผิดพลาด! รูปแบบ JSON ไม่ถูกต้อง\n\nรายละเอียด: " + error.message);
+            }
+        });
 
                         // 🌟 ปุ่ม "🗑️" ลบ Preset ปัจจุบัน
         $('#rpg-delete-preset-btn').on('click', () => {
