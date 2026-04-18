@@ -487,16 +487,25 @@ function setupUI() {
                             settings.saveData[currentKey][mod.id] = Array.isArray(mod.default) ? JSON.parse(JSON.stringify(mod.default)) : mod.default;
                         }
                         else if (Array.isArray(mod.default) && Array.isArray(existingData)) {
-                            // กรณีที่ 2: โมดูลแบบ Array (เช่น ไอเทม, สกิล)
-                            // เช็คว่าใน JSON มีการเพิ่มไอเทม/สกิลใหม่ ที่เซฟปัจจุบันยังไม่มีหรือเปล่า
+                            // 🌟 [แก้ไขใหม่] ดึงของเก่าออกมาก่อน
+                            let updatedArray = [...existingData];
+
                             mod.default.forEach(defItem => {
-                                // เช็คจากชื่อไอเทม/สกิล
-                                const found = existingData.find(item => item.name === defItem.name);
+                                // เช็คจากชื่อว่ามีอยู่แล้วหรือยัง
+                                const found = updatedArray.find(item => item.name === defItem.name);
+
                                 if (!found) {
-                                    // ถ้าเซฟปัจจุบันยังไม่มีไอเทมนี้ ให้ยัดเพิ่มเข้าไปเลย! (ข้อมูลเก่าไม่หาย)
-                                    existingData.push(JSON.parse(JSON.stringify(defItem)));
+                                    // ถ้ายังไม่มี ยัดของใหม่เข้าไป
+                                    updatedArray.push(JSON.parse(JSON.stringify(defItem)));
+                                    console.log(`[RPG Status] ➕ เพิ่มของใหม่เข้ากระเป๋า: ${defItem.name}`);
+                                } else {
+                                    // ถ้ามีแล้ว ให้อัปเดตแค่คำอธิบาย
+                                    if (defItem.desc !== undefined) found.desc = defItem.desc;
                                 }
                             });
+
+                            // 🌟 บังคับเซฟทับลงไประบบตรงๆ เพื่อให้มันรู้ว่ามีการอัปเดตแล้ว!
+                            settings.saveData[currentKey][mod.id] = updatedArray;
                         }
                     });
                 });
