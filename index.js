@@ -732,11 +732,6 @@ function setupUI() {
         renderUI();
         console.log(`[${extensionName}] 🎉 โหลด UI ทั้งหมดเสร็จสมบูรณ์!`);
 
-     catch (error) {
-        console.error(`[${extensionName}] ❌ เกิดข้อผิดพลาดในการสร้าง UI:`, error);
-    }
-}
-
 // ฟังก์ชันสำหรับตรวจสอบข้อความ AI ด้วย Regex
 async function handleIncomingMessage() {
     const context = getContext();
