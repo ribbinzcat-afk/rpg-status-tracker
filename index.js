@@ -4,7 +4,7 @@ console.log("===== ไฟล์ index.js ของ RPG Status ถูกอ่า
 import { extension_settings, getContext } from "../../../extensions.js";
 
 // นำเข้า API ทั้งหมดจาก script.js
-import { eventSource, event_types, extension_prompt_types, extension_prompt_roles, setExtensionPrompt, saveSettingsDebounced } from "../../../../script.js";
+import { eventSource, event_types, extension_prompt_types, extension_prompt_roles, setExtensionPrompt } from "../../../../script.js";
 
 // ชื่อของ Extension เรา (ใช้สำหรับเซฟการตั้งค่า)
 const extensionName = "rpg-status-tracker";
@@ -467,60 +467,22 @@ function setupUI() {
             $('#rpg-editor-container').css('display', 'flex');
         });
 
-        // 🌟 ปุ่ม "💾" บันทึก JSON ที่แก้ไข (Smart Merge System)
+        // 🌟 ปุ่ม "💾" บันทึก JSON ที่แก้ไข
         $('#rpg-save-preset-btn').on('click', () => {
             try {
                 const currentKey = settings.currentPreset;
                 const editorValue = $('#rpg-preset-editor').val();
                 const newTabsData = JSON.parse(editorValue);
 
-                // 1. อัปเดตโครงสร้างหน้าต่าง
                 settings.presets[currentKey].tabs = newTabsData;
 
-                // 2. ผสานข้อมูล (Smart Merge)
                 newTabsData.forEach(tab => {
                     tab.modules.forEach(mod => {
-                        const existingData = settings.saveData[currentKey][mod.id];
-
-                        if (existingData === undefined) {
-                            // กรณีที่ 1: โมดูลใหม่เอี่ยม (เพิ่งสร้าง) -> ดึงค่า default มาใส่เลย
-                            settings.saveData[currentKey][mod.id] = Array.isArray(mod.default) ? JSON.parse(JSON.stringify(mod.default)) : mod.default;
-                        }
-                        else if (Array.isArray(mod.default) && Array.isArray(existingData)) {
-                            // 🌟 [แก้ไขใหม่] ดึงของเก่าออกมาก่อน
-                            let updatedArray = [...existingData];
-
-                            mod.default.forEach(defItem => {
-                                // เช็คจากชื่อว่ามีอยู่แล้วหรือยัง
-                                const found = updatedArray.find(item => item.name === defItem.name);
-
-                                if (!found) {
-                                    // ถ้ายังไม่มี ยัดของใหม่เข้าไป
-                                    updatedArray.push(JSON.parse(JSON.stringify(defItem)));
-                                    console.log(`[RPG Status] ➕ เพิ่มของใหม่เข้ากระเป๋า: ${defItem.name}`);
-                                } else {
-                                    // ถ้ามีแล้ว ให้อัปเดตแค่คำอธิบาย
-                                    if (defItem.desc !== undefined) found.desc = defItem.desc;
-                                }
-                            });
-
-                            // 🌟 บังคับเซฟทับลงไประบบตรงๆ เพื่อให้มันรู้ว่ามีการอัปเดตแล้ว!
-                            settings.saveData[currentKey][mod.id] = updatedArray;
+                        if (settings.saveData[currentKey][mod.id] === undefined) {
+                            settings.saveData[currentKey][mod.id] = Array.isArray(mod.default) ? [] : mod.default;
                         }
                     });
                 });
-
-                // ปิดหน้าต่าง Editor และแสดงหน้าจอปกติ
-                $('#rpg-editor-container').hide();
-                $('.rpg-tabs, .rpg-modal-content').show();
-
-                // 🌟 เรียกใช้ฟังก์ชันรีเฟรชแบบจัดเต็ม!
-                refreshStatusUI("บันทึก Preset และผสานข้อมูลสำเร็จ!");
-
-            } catch (error) {
-                alert("เกิดข้อผิดพลาด! รูปแบบ JSON ไม่ถูกต้อง\n\nรายละเอียด: " + error.message);
-            }
-        });
 
                         // 🌟 ปุ่ม "🗑️" ลบ Preset ปัจจุบัน
         $('#rpg-delete-preset-btn').on('click', () => {
@@ -557,7 +519,7 @@ function setupUI() {
             } catch (error) {
                 alert("เกิดข้อผิดพลาด! รูปแบบ JSON ไม่ถูกต้อง\n\nรายละเอียด: " + error.message);
             }
-        };
+        });
 
                 // 🌟 ปุ่มสลับธีม (Light/Dark Mode)
         $('#rpg-theme-btn').on('click', () => {
@@ -731,6 +693,11 @@ function setupUI() {
         // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
         renderUI();
         console.log(`[${extensionName}] 🎉 โหลด UI ทั้งหมดเสร็จสมบูรณ์!`);
+
+    } catch (error) {
+        console.error(`[${extensionName}] ❌ เกิดข้อผิดพลาดในการสร้าง UI:`, error);
+    }
+}
 
 // ฟังก์ชันสำหรับตรวจสอบข้อความ AI ด้วย Regex
 async function handleIncomingMessage() {
@@ -941,7 +908,7 @@ async function handleIncomingMessage() {
         lastMessage.mes = cleanedText;
 
         // 5. อัปเดตหน้าต่าง UI สถานะของเรา!
-        refreshStatusUI("AI อัปเดตสถานะของคุณแล้ว!");
+        renderUI();
         console.log(`[${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว!`);
 
         // 🌟 6. แสดงการแจ้งเตือนให้ผู้เล่นรู้! 🌟
@@ -1258,35 +1225,6 @@ function updateExtensionPrompt() {
     } catch (error) {
         // ถ้ามี Error (เช่น หาคำสั่ง setExtensionPrompt ไม่เจอ) มันจะฟ้องสีแดงตรงนี้ครับ!
         console.error(`[${extensionName}] ❌ เกิดข้อผิดพลาดในการอัปเดต Prompt:`, error);
-    }
-}
-
-// ฟังก์ชันสำหรับรีเฟรชหน้าจอ พร้อมเอฟเฟกต์แจ้งเตือน
-function refreshStatusUI(message = "อัปเดตสถานะตัวละครเรียบร้อยแล้ว") {
-    // 1. วาดหน้าต่างใหม่
-    renderUI();
-
-    // 2. ทำให้ปุ่ม Status กระพริบแสงสีเขียว
-    const topBtn = $('#rpg-status-floating-btn');
-    const fabBtn = $('#rpg-fab-btn');
-
-    [topBtn, fabBtn].forEach(btn => {
-        if (btn.length) {
-            btn.removeClass('rpg-updated-glow');
-            void btn[0].offsetWidth;
-            btn.addClass('rpg-updated-glow');
-        }
-    });
-
-    // 3. เด้งป๊อปอัปแจ้งเตือนมุมจอ
-    if (typeof toastr !== 'undefined') {
-        toastr.success(message, "RPG Status");
-    }
-
-    // 4. บันทึกการตั้งค่าลงระบบ ป้องกันข้อมูลหาย
-    // (เรียกใช้ฟังก์ชันที่เรา import มาจากด้านบนได้เลย)
-    if (typeof saveSettingsDebounced === 'function') {
-        saveSettingsDebounced();
     }
 }
 
