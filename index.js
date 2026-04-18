@@ -732,7 +732,7 @@ function setupUI() {
         renderUI();
         console.log(`[${extensionName}] 🎉 โหลด UI ทั้งหมดเสร็จสมบูรณ์!`);
 
-    } catch (error) {
+     catch (error) {
         console.error(`[${extensionName}] ❌ เกิดข้อผิดพลาดในการสร้าง UI:`, error);
     }
 }
