@@ -557,7 +557,7 @@ function setupUI() {
             } catch (error) {
                 alert("เกิดข้อผิดพลาด! รูปแบบ JSON ไม่ถูกต้อง\n\nรายละเอียด: " + error.message);
             }
-        });
+        };
 
                 // 🌟 ปุ่มสลับธีม (Light/Dark Mode)
         $('#rpg-theme-btn').on('click', () => {
