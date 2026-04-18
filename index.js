@@ -538,10 +538,10 @@ function setupUI() {
         });
 
         // เซ็ตธีมเริ่มต้นตอนเปิดหน้าต่างครั้งแรก
-        if (settings.theme === "light") {
-            $('#rpg-status-modal').addClass('rpg-light-mode');
-            $('#rpg-theme-btn i').removeClass('fa-moon').addClass('fa-sun');
-        }
+        //if (settings.theme === "light") {
+        //    $('#rpg-status-modal').addClass('rpg-light-mode');
+        //    $('#rpg-theme-btn i').removeClass('fa-moon').addClass('fa-sun');
+        //}
 
         // 🌟 ระบบลากหน้าต่าง (Draggable)
         const statusModal = $('#rpg-status-modal');
