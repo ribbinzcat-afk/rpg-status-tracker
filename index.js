@@ -510,13 +510,12 @@ function setupUI() {
                     });
                 });
 
-                // 3. ปิดหน้าต่าง Editor และวาดหน้าจอใหม่
+                // ปิดหน้าต่าง Editor และแสดงหน้าจอปกติ
                 $('#rpg-editor-container').hide();
                 $('.rpg-tabs, .rpg-modal-content').show();
-                renderUI();
 
-                // แจ้งเตือนเบาๆ ว่าผสานข้อมูลสำเร็จ
-                if (typeof toastr !== 'undefined') toastr.success("บันทึกและผสานข้อมูลสำเร็จ!", "RPG Status");
+                // 🌟 เรียกใช้ฟังก์ชันรีเฟรชแบบจัดเต็ม!
+                refreshStatusUI("บันทึก Preset และผสานข้อมูลสำเร็จ!");
 
             } catch (error) {
                 alert("เกิดข้อผิดพลาด! รูปแบบ JSON ไม่ถูกต้อง\n\nรายละเอียด: " + error.message);
@@ -947,7 +946,7 @@ async function handleIncomingMessage() {
         lastMessage.mes = cleanedText;
 
         // 5. อัปเดตหน้าต่าง UI สถานะของเรา!
-        renderUI();
+        refreshStatusUI("AI อัปเดตสถานะของคุณแล้ว!");
         console.log(`[${extensionName}] ✅ อัปเดตสถานะและ UI เรียบร้อยแล้ว!`);
 
         // 🌟 6. แสดงการแจ้งเตือนให้ผู้เล่นรู้! 🌟
@@ -1265,6 +1264,33 @@ function updateExtensionPrompt() {
         // ถ้ามี Error (เช่น หาคำสั่ง setExtensionPrompt ไม่เจอ) มันจะฟ้องสีแดงตรงนี้ครับ!
         console.error(`[${extensionName}] ❌ เกิดข้อผิดพลาดในการอัปเดต Prompt:`, error);
     }
+}
+
+// ฟังก์ชันสำหรับรีเฟรชหน้าจอ พร้อมเอฟเฟกต์แจ้งเตือน
+function refreshStatusUI(message = "อัปเดตสถานะตัวละครเรียบร้อยแล้ว") {
+    // 1. วาดหน้าต่างใหม่
+    renderUI();
+
+    // 2. ทำให้ปุ่ม Status (ทั้งเมนูบนและปุ่มกลม) กระพริบแสงสีเขียว 2 วินาที
+    const topBtn = $('#rpg-status-floating-btn');
+    const fabBtn = $('#rpg-fab-btn');
+
+    [topBtn, fabBtn].forEach(btn => {
+        if (btn.length) {
+            btn.removeClass('rpg-updated-glow');
+            void btn[0].offsetWidth; // ทริคบังคับ CSS รีเฟรช
+            btn.addClass('rpg-updated-glow');
+        }
+    });
+
+    // 3. เด้งป๊อปอัปแจ้งเตือนมุมจอ
+    if (typeof toastr !== 'undefined') {
+        toastr.success(message, "RPG Status");
+    }
+
+    // 4. บันทึกการตั้งค่าลงระบบ SillyTavern ป้องกันข้อมูลหายเวลารีเฟรชเว็บ
+    const { saveSettingsDebounced } = require("../../../../script.js");
+    if (saveSettingsDebounced) saveSettingsDebounced();
 }
 
 // สั่งให้ Extension เริ่มทำงาน
