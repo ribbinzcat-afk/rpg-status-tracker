@@ -235,6 +235,18 @@ function generateStatusPrompt() {
                 }
             }
 
+                        // 🌟 [ใหม่] ส่งข้อมูล Map ให้ AI (ส่งแค่พิกัด ประหยัด Token มาก!)
+            else if (module.type === "map") {
+                if (val && val.size && Array.isArray(val.entities)) {
+                    const sizeStr = `${val.size[0]}x${val.size[1]}`;
+                    // แปลงข้อมูลเป็น: Player(2,2), Goblin(4,4)
+                    const entityStr = val.entities.map(e => `${e.name}(${e.x},${e.y})`).join(', ');
+                    tabData.push(`${module.name.split(' ')[0]}: MapSize[${sizeStr}] | Positions: ${entityStr}`);
+                } else {
+                    tabData.push(`${module.name.split(' ')[0]}: No Map Data`);
+                }
+            }
+
         });
 
         if (tabData.length > 0) {
@@ -690,6 +702,23 @@ function setupUI() {
             }
         });
 
+                // 🌟 ระบบคลิกเดินบนแผนที่ (User Click to Move)
+        $('.rpg-modal-content').off('click', '.rpg-map-cell').on('click', '.rpg-map-cell', function() {
+            const moduleId = $(this).data('module');
+            const targetX = $(this).data('x');
+            const targetY = $(this).data('y');
+
+            const currentKey = settings.currentPreset;
+            const mapData = settings.saveData[currentKey][moduleId];
+
+            if (mapData && Array.isArray(mapData.entities) && mapData.entities.length > 0) {
+                // 💡 กฎของเรา: ตัวละคร "ตัวแรกสุด (index 0)" ใน JSON คือตัวละครของผู้เล่นเสมอ!
+                mapData.entities[0].x = targetX;
+                mapData.entities[0].y = targetY;
+                renderUI(); // วาดกระดานใหม่ ตัวละครจะวาร์ปไปช่องที่กดทันที!
+            }
+        });
+
         // สั่งวาดเนื้อหาในหน้าต่างครั้งแรก
         renderUI();
         console.log(`[${extensionName}] 🎉 โหลด UI ทั้งหมดเสร็จสมบูรณ์!`);
@@ -897,6 +926,28 @@ async function handleIncomingMessage() {
                             likes: Math.floor(Math.random() * 50) + 1, // สุ่มยอดไลก์เริ่มต้นให้ดูเนียนๆ
                             comments: []
                         });
+                    }
+                }
+            }
+
+            // 🌟 [ใหม่] กรณีเป็น Module แบบ Map (กระดานตาราง D&D)
+            // ฟอร์แมตที่ AI ต้องพิมพ์: battle_map: Goblin = 3,4  (ชื่อ = พิกัด X, Y)
+            else if (moduleDef.type === "map") {
+                const mapMatch = valueStr.match(/^(.*?)\s*=\s*(\d+)\s*,\s*(\d+)$/);
+                if (mapMatch) {
+                    const entityName = mapMatch[1].trim();
+                    const newX = parseInt(mapMatch[2]);
+                    const newY = parseInt(mapMatch[3]);
+
+                    if (saveData[key] && Array.isArray(saveData[key].entities)) {
+                        let entity = saveData[key].entities.find(e => e.name === entityName);
+                        if (entity) {
+                            entity.x = newX;
+                            entity.y = newY;
+                        } else {
+                            // ถ้า AI เสกตัวละครใหม่ขึ้นมาในแมพ
+                            saveData[key].entities.push({ name: entityName, icon: "❓", x: newX, y: newY });
+                        }
                     }
                 }
             }
@@ -1176,6 +1227,36 @@ function renderUI() {
                     tabContentHtml += `<div class="rpg-empty-text" style="text-align:center; margin-top: 20px;">- ยังไม่มีความเคลื่อนไหว -</div>`;
                 }
                 tabContentHtml += `</div>`;
+            }
+
+            // 🌟 วาดหน้าจอ Map (กระดาน D&D)
+            else if (module.type === "map") {
+                if (currentValue && currentValue.size && Array.isArray(currentValue.entities)) {
+                    const width = currentValue.size[0];
+                    const height = currentValue.size[1];
+
+                    tabContentHtml += `<div class="rpg-map-container">`;
+                    // สร้าง CSS Grid ตามขนาด width x height
+                    tabContentHtml += `<div class="rpg-map-grid" style="grid-template-columns: repeat(${width}, 1fr); grid-template-rows: repeat(${height}, 1fr);">`;
+
+                    // วนลูปสร้างช่องตาราง (Y คือแถวบนลงล่าง, X คือคอลัมน์ซ้ายไปขวา)
+                    for (let y = 1; y <= height; y++) {
+                        for (let x = 1; x <= width; x++) {
+                            // หาว่ามีตัวละครไหนยืนอยู่ช่องนี้บ้าง
+                            const entitiesHere = currentValue.entities.filter(e => e.x === x && e.y === y);
+                            let cellContent = "";
+                            if (entitiesHere.length > 0) {
+                                // ถ้ามีหลายตัวยืนทับกัน ก็ให้โชว์ซ้อนกัน
+                                cellContent = entitiesHere.map(e => `<span class="rpg-map-entity" title="${e.name}">${e.icon}</span>`).join('');
+                            }
+
+                            // วาดช่อง 1 ช่อง พร้อมใส่พิกัดซ่อนไว้ให้ระบบรู้เวลากดคลิก
+                            tabContentHtml += `<div class="rpg-map-cell" data-module="${module.id}" data-x="${x}" data-y="${y}">${cellContent}</div>`;
+                        }
+                    }
+                    tabContentHtml += `</div></div>`;
+                    tabContentHtml += `<div style="font-size: 0.8em; color: #aaa; text-align: center; margin-top: 5px;"><i class="fa-solid fa-hand-pointer"></i> แตะที่ช่องว่างเพื่อเดิน (ตัวละครหลัก)</div>`;
+                }
             }
 
             tabContentHtml += `</div>`; // ปิด rpg-module-group
