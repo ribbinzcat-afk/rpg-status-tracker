@@ -930,24 +930,51 @@ async function handleIncomingMessage() {
                 }
             }
 
-            // 🌟 [ใหม่] กรณีเป็น Module แบบ Map (กระดานตาราง D&D)
-            // ฟอร์แมตที่ AI ต้องพิมพ์: battle_map: Goblin = 3,4  (ชื่อ = พิกัด X, Y)
+            // 🌟 [ใหม่] กรณีเป็น Module แบบ Map (อัปเกรด: เสกตัวใหม่, ลบทิ้ง, เปลี่ยนขนาดกระดานได้!)
             else if (moduleDef.type === "map") {
-                const mapMatch = valueStr.match(/^(.*?)\s*=\s*(\d+)\s*,\s*(\d+)$/);
+                if (!saveData[key].entities) saveData[key].entities = [];
+
+                // เช็คว่าเป็นคำสั่ง "เปลี่ยนขนาดกระดาน" หรือไม่ (เช่น SIZE = 8, 8)
+                const sizeMatch = valueStr.match(/^SIZE\s*=\s*(\d+)\s*,\s*(\d+)$/i);
+                if (sizeMatch) {
+                    saveData[key].size = [parseInt(sizeMatch[1]), parseInt(sizeMatch[2])];
+                    return; // จบคำสั่งนี้
+                }
+
+                // เช็คว่าเป็นคำสั่ง "ลบตัวละคร" หรือไม่ (เช่น Goblin = REMOVE)
+                const removeMatch = valueStr.match(/^(.*?)\s*=\s*REMOVE$/i);
+                if (removeMatch) {
+                    const targetName = removeMatch[1].trim();
+                    // กรองตัวละครนั้นออก (แต่ห้ามลบ Player ตัวแรกสุดเด็ดขาด)
+                    if (saveData[key].entities.length > 0 && saveData[key].entities[0].name !== targetName) {
+                        saveData[key].entities = saveData[key].entities.filter(e => e.name !== targetName);
+                    }
+                    return; // จบคำสั่งนี้
+                }
+
+                // คำสั่งเดิน หรือ เสกตัวใหม่ (เช่น บอส = 3, 3 (🐉) )
+                const mapMatch = valueStr.match(/^(.*?)\s*=\s*(\d+)\s*,\s*(\d+)(?:\s*\((.*?)\))?$/);
                 if (mapMatch) {
                     const entityName = mapMatch[1].trim();
                     const newX = parseInt(mapMatch[2]);
                     const newY = parseInt(mapMatch[3]);
+                    const newIcon = mapMatch[4] ? mapMatch[4].trim() : null;
 
-                    if (saveData[key] && Array.isArray(saveData[key].entities)) {
-                        let entity = saveData[key].entities.find(e => e.name === entityName);
-                        if (entity) {
-                            entity.x = newX;
-                            entity.y = newY;
-                        } else {
-                            // ถ้า AI เสกตัวละครใหม่ขึ้นมาในแมพ
-                            saveData[key].entities.push({ name: entityName, icon: "❓", x: newX, y: newY });
-                        }
+                    let entity = saveData[key].entities.find(e => e.name === entityName);
+
+                    if (entity) {
+                        // ถ้ามีอยู่แล้ว ให้เดินไปจุดใหม่
+                        entity.x = newX;
+                        entity.y = newY;
+                        if (newIcon) entity.icon = newIcon; // เปลี่ยนร่าง/เปลี่ยนไอคอนได้ด้วย
+                    } else {
+                        // 🌟 ถ้ายังไม่มี AI จะเสกขึ้นมาใหม่พร้อมไอคอน!
+                        saveData[key].entities.push({
+                            name: entityName,
+                            icon: newIcon || "❓", // ถ้า AI ลืมใส่ไอคอน จะขึ้นเป็น ❓
+                            x: newX,
+                            y: newY
+                        });
                     }
                 }
             }
