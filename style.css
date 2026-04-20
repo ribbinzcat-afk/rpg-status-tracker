@@ -1,27 +1,93 @@
 /* =========================================
-   ตัวแปรสีสำหรับ Dark Mode (ค่าเริ่มต้น)
+   ระบบสีธีม (Theme Colors)
    ========================================= */
-#rpg-status-modal {
+/* 1. สีดำ / ไซเบอร์ (Default) */
+#rpg-status-modal, #rpg-fab-btn {
     --holo-bg: rgba(15, 20, 30, 0.85);
     --holo-border: rgba(0, 255, 255, 0.4);
     --holo-text: #e0f7fa;
     --holo-card: rgba(0, 0, 0, 0.5);
     --holo-glow: 0 0 20px rgba(0, 255, 255, 0.2);
-    --holo-accent: #00e5ff;
+    --holo-accent: #00e5ff; /* สีฟ้าไซไฟ */
     --holo-chat-bg: rgba(0, 255, 255, 0.1);
 }
 
-/* =========================================
-   ตัวแปรสีสำหรับ Light Mode
-   ========================================= */
-#rpg-status-modal.rpg-light-mode {
-    --holo-bg: rgba(245, 247, 250, 0.9);
-    --holo-border: rgba(150, 150, 150, 0.4);
-    --holo-text: #2c3e50;
-    --holo-card: rgba(255, 255, 255, 0.7);
-    --holo-glow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    --holo-accent: #2980b9;
-    --holo-chat-bg: rgba(41, 128, 185, 0.1);
+/* 2. สีขาว (Light Mode) */
+.rpg-theme-white {
+    --holo-bg: rgba(245, 247, 250, 0.95) !important;
+    --holo-border: rgba(150, 150, 150, 0.4) !important;
+    --holo-text: #2c3e50 !important;
+    --holo-card: rgba(255, 255, 255, 0.7) !important;
+    --holo-glow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    --holo-accent: #2980b9 !important; /* สีน้ำเงินเข้ม */
+    --holo-chat-bg: rgba(41, 128, 185, 0.1) !important;
+}
+
+/* 3. สีดำล้วน (Monochrome) */
+.rpg-theme-black {
+    --holo-border: rgba(255, 255, 255, 0.3) !important;
+    --holo-glow: 0 0 20px rgba(255, 255, 255, 0.1) !important;
+    --holo-accent: #ffffff !important;
+    --holo-chat-bg: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 4. สีชมพู (Pink) */
+.rpg-theme-pink {
+    --holo-border: rgba(255, 105, 180, 0.4) !important;
+    --holo-glow: 0 0 20px rgba(255, 105, 180, 0.2) !important;
+    --holo-accent: #ff69b4 !important;
+    --holo-chat-bg: rgba(255, 105, 180, 0.1) !important;
+}
+
+/* 5. สีส้ม (Orange) */
+.rpg-theme-orange {
+    --holo-border: rgba(255, 140, 0, 0.4) !important;
+    --holo-glow: 0 0 20px rgba(255, 140, 0, 0.2) !important;
+    --holo-accent: #ff8c00 !important;
+    --holo-chat-bg: rgba(255, 140, 0, 0.1) !important;
+}
+
+/* 6. สีเหลือง (Yellow/Gold) */
+.rpg-theme-yellow {
+    --holo-border: rgba(255, 215, 0, 0.4) !important;
+    --holo-glow: 0 0 20px rgba(255, 215, 0, 0.2) !important;
+    --holo-accent: #ffd700 !important;
+    --holo-chat-bg: rgba(255, 215, 0, 0.1) !important;
+}
+
+/* 7. สีม่วง (Purple) */
+.rpg-theme-purple {
+    --holo-border: rgba(153, 50, 204, 0.4) !important;
+    --holo-glow: 0 0 20px rgba(153, 50, 204, 0.2) !important;
+    --holo-accent: #9932cc !important;
+    --holo-chat-bg: rgba(153, 50, 204, 0.1) !important;
+}
+
+/* 8. สีน้ำเงิน (Blue) */
+.rpg-theme-blue {
+    --holo-border: rgba(30, 144, 255, 0.4) !important;
+    --holo-glow: 0 0 20px rgba(30, 144, 255, 0.2) !important;
+    --holo-accent: #1e90ff !important;
+    --holo-chat-bg: rgba(30, 144, 255, 0.1) !important;
+}
+
+/* 9. สีเขียว (Green) */
+.rpg-theme-green {
+    --holo-border: rgba(0, 255, 100, 0.4) !important;
+    --holo-glow: 0 0 20px rgba(0, 255, 100, 0.2) !important;
+    --holo-accent: #00ff64 !important;
+    --holo-chat-bg: rgba(0, 255, 100, 0.1) !important;
+}
+
+/* 10. สีน้ำตาล/เบจ (Brown/Beige - สไตล์กระดาษเก่า) */
+.rpg-theme-brown {
+    --holo-bg: rgba(245, 235, 220, 0.95) !important;
+    --holo-border: rgba(139, 69, 19, 0.4) !important;
+    --holo-text: #4a3728 !important;
+    --holo-card: rgba(255, 255, 255, 0.6) !important;
+    --holo-glow: 0 10px 25px rgba(139, 69, 19, 0.15) !important;
+    --holo-accent: #8b4513 !important;
+    --holo-chat-bg: rgba(139, 69, 19, 0.1) !important;
 }
 
 /* =========================================
@@ -523,7 +589,7 @@
 
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, var(--holo-accent), #003366);
+    background: var(--holo-accent);
     color: #ffffff;
     border: 3px solid rgba(255, 255, 255, 0.9);
     border-radius: 50%;
