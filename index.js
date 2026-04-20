@@ -15,7 +15,7 @@ const defaultSettings = {
     currentPreset: "fantasy", // Preset ที่กำลังใช้งานอยู่
     showFloatingButton: true,
     showFabButton: true,
-    theme: "dark",
+    themeColor: "default",
 
     // 1. ส่วนโครงสร้าง UI (Layout)
     presets: {
@@ -361,10 +361,24 @@ function setupUI() {
                 <span>แสดงปุ่ม Status ที่เมนูด้านบน</span>
             </label>
             <br>
-            <label class="checkbox_label" style="margin-top: 5px;">
+            <label class="checkbox_label" style="margin-top: 5px; margin-bottom: 10px;">
                 <input type="checkbox" id="rpg-toggle-fab-btn" ${settings.showFabButton ? 'checked' : ''}>
                 <span>แสดงปุ่มกลม (FAB) ที่มุมขวาล่าง</span>
             </label>
+            <hr>
+            <label style="font-size: 0.9em; font-weight: bold;">🎨 สีธีมหน้าต่าง:</label>
+            <select id="rpg-theme-color-select" class="text_pole" style="width: 100%; margin-top: 5px;">
+                <option value="default">ฟ้าไซไฟ (Default)</option>
+                <option value="rpg-theme-black">ดำล้วน (Black)</option>
+                <option value="rpg-theme-white">ขาว (White)</option>
+                <option value="rpg-theme-pink">ชมพู (Pink)</option>
+                <option value="rpg-theme-orange">ส้ม (Orange)</option>
+                <option value="rpg-theme-yellow">เหลือง (Yellow)</option>
+                <option value="rpg-theme-purple">ม่วง (Purple)</option>
+                <option value="rpg-theme-blue">น้ำเงิน (Blue)</option>
+                <option value="rpg-theme-green">เขียว (Green)</option>
+                <option value="rpg-theme-brown">น้ำตาล/เบจ (Brown)</option>
+            </select>
         `;
         panelContainer.appendChild(toggleContainer);
 
@@ -395,7 +409,7 @@ function setupUI() {
                 <div class="rpg-modal-header">
                     <div class="rpg-header-controls">
                         <select class="rpg-preset-select" id="rpg-preset-dropdown"></select>
-                        <button class="rpg-icon-btn" id="rpg-theme-btn" title="สลับโหมดสว่าง/มืด"><i class="fa-solid fa-moon"></i></button>
+                        <button class="rpg-icon-btn" id="rpg-theme-btn" title="เปลี่ยนสีธีม"><i class="fa-solid fa-palette"></i></button>
                         <button class="rpg-icon-btn" id="rpg-new-preset-btn" title="สร้าง Preset ใหม่"><i class="fa-solid fa-plus"></i></button>
                         <button class="rpg-icon-btn" id="rpg-edit-preset-btn" title="แก้ไขโครงสร้าง Preset"><i class="fa-solid fa-pen"></i></button>
                         <button class="rpg-icon-btn" id="rpg-delete-preset-btn" title="ลบ Preset นี้" style="color: #ff6b6b;"><i class="fa-solid fa-trash"></i></button>
@@ -533,21 +547,47 @@ function setupUI() {
             }
         });
 
-                // 🌟 ปุ่มสลับธีม (Light/Dark Mode)
-        $('#rpg-theme-btn').on('click', () => {
-            const modal = $('#rpg-status-modal');
-            const icon = $('#rpg-theme-btn i');
+        // 🌟 ระบบจัดการสีธีม (Theme Colors)
+        const themeList = ["default", "rpg-theme-black", "rpg-theme-white", "rpg-theme-pink", "rpg-theme-orange", "rpg-theme-yellow", "rpg-theme-purple", "rpg-theme-blue", "rpg-theme-green", "rpg-theme-brown"];
 
-            if (settings.theme === "dark") {
-                settings.theme = "light";
-                modal.addClass('rpg-light-mode');
-                icon.removeClass('fa-moon').addClass('fa-sun');
-            } else {
-                settings.theme = "dark";
-                modal.removeClass('rpg-light-mode');
-                icon.removeClass('fa-sun').addClass('fa-moon');
+        function applyThemeColor(themeClass) {
+            const modal = $('#rpg-status-modal');
+            const fab = $('#rpg-fab-btn');
+
+            // ลบสีเก่าออกให้หมดก่อน
+            themeList.forEach(t => {
+                modal.removeClass(t);
+                fab.removeClass(t);
+            });
+
+            // ใส่สีใหม่เข้าไป (ถ้าไม่ใช่ default)
+            if (themeClass !== "default") {
+                modal.addClass(themeClass);
+                fab.addClass(themeClass);
             }
+
+            // อัปเดต Dropdown ให้ตรงกัน
+            $('#rpg-theme-color-select').val(themeClass);
+        }
+
+        // เมื่อกดเปลี่ยนสีจาก Dropdown ในแผงตั้งค่า
+        $('#rpg-theme-color-select').on('change', function() {
+            settings.themeColor = $(this).val();
+            applyThemeColor(settings.themeColor);
         });
+
+        // เมื่อกดปุ่มจานสี (Palette) ที่หน้าต่าง ให้สลับสีถัดไปเรื่อยๆ
+        $('#rpg-theme-btn').on('click', () => {
+            let currentIndex = themeList.indexOf(settings.themeColor);
+            currentIndex = (currentIndex + 1) % themeList.length; // วนลูปกลับไป 0 ถ้าถึงอันสุดท้าย
+            settings.themeColor = themeList[currentIndex];
+            applyThemeColor(settings.themeColor);
+        });
+
+        // โหลดสีที่เคยเซฟไว้ตอนเปิดเว็บ
+        if (settings.themeColor) {
+            applyThemeColor(settings.themeColor);
+        }
 
         // เซ็ตธีมเริ่มต้นตอนเปิดหน้าต่างครั้งแรก
         //if (settings.theme === "light") {
