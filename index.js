@@ -160,7 +160,7 @@ function generateStatusPrompt() {
                         let text = `${item.name}(x${item.amount})`;
 
                         // ถ้ามีคำอธิบาย (desc) ให้เอามาต่อท้ายในวงเล็บเหลี่ยม
-                        if (item.desc && item.desc.trim() !== "") {
+                        if (item.desc && String(item.desc).trim() !== "") {
                             text += ` [${item.desc}]`;
                         }
                         return text;
@@ -202,7 +202,7 @@ function generateStatusPrompt() {
                         let text = `${s.name}(Lv.${s.level || 1}) [สถานะ: ${s.status || "พร้อมใช้งาน"}]`;
 
                         // ถ้ามีคำอธิบาย ให้เอามาต่อท้าย
-                        if (s.desc && s.desc.trim() !== "") {
+                        if (s.desc && String(s.desc).trim() !== "") {
                             text += ` - ${s.desc}`;
                         }
                         return text;
